@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "notepad-sharp",
+  "productName": "Notepad Sharp",
   "version": "0.1.0",
-  "identifier": "com.plpasig.notepad-sharp",
+  "identifier": "com.Christopher-Quinto.notepad-sharp",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
