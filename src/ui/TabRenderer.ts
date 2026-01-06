@@ -1,0 +1,62 @@
+// src/ui/TabRenderer.ts
+
+import type { Tab } from "../types";
+
+export class TabRenderer {
+  private onTabClick: (tabId: number) => void;
+  private onTabClose: (tabId: number) => Promise<void>;
+
+  constructor(
+    onTabClick: (tabId: number) => void,
+    onTabClose: (tabId: number) => Promise<void>
+  ) {
+    this.onTabClick = onTabClick;
+    this.onTabClose = onTabClose;
+  }
+
+  render(tabs: Tab[], activeTabId: number | null): void {
+    const tabBar = document.getElementById("tab-bar");
+    if (!tabBar) return;
+
+    tabBar.innerHTML = "";
+
+    tabs.forEach((tab) => {
+      const tabEl = this.createTabElement(tab, activeTabId);
+      tabBar.appendChild(tabEl);
+    });
+  }
+
+  private createTabElement(
+    tab: Tab,
+    activeTabId: number | null
+  ): HTMLButtonElement {
+    const tabEl = document.createElement("button");
+    tabEl.className = this.getTabClasses(tab, activeTabId);
+    tabEl.setAttribute("tabindex", "-1");
+    tabEl.onclick = () => this.onTabClick(tab.id);
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "tab-name";
+    nameSpan.textContent = tab.name;
+
+    const closeBtn = document.createElement("span");
+    closeBtn.className = "tab-close";
+    closeBtn.innerHTML = "×";
+    closeBtn.onclick = async (e) => {
+      e.stopPropagation();
+      await this.onTabClose(tab.id);
+    };
+
+    tabEl.appendChild(nameSpan);
+    tabEl.appendChild(closeBtn);
+
+    return tabEl;
+  }
+
+  private getTabClasses(tab: Tab, activeTabId: number | null): string {
+    const classes = ["tab"];
+    if (tab.id === activeTabId) classes.push("active");
+    if (tab.modified) classes.push("modified");
+    return classes.join(" ");
+  }
+}
