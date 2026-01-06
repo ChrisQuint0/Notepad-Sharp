@@ -9,39 +9,90 @@
   <body>
     <div id="app">
       <div id="toolbar">
-        <div id="toolbar">
-          <button id="btn-new" tabindex="-1">New</button>
-          <button id="btn-open" tabindex="-1">Open</button>
-          <button id="btn-save" tabindex="-1">Save</button>
+        <button id="btn-new" tabindex="-1">New</button>
+        <button id="btn-open" tabindex="-1">Open</button>
+        <button id="btn-save" tabindex="-1">Save</button>
 
-          <div class="dropdown">
-            <button id="btn-templates" tabindex="-1">Templates</button>
-            <div class="dropdown-content">
-              <button class="dropdown-item" data-template="csharp">
-                <span>C# Template</span>
-                <span class="shortcut">Ctrl+3</span>
-              </button>
-              <button class="dropdown-item" data-template="cpp">
-                <span>C++ Template</span>
-                <span class="shortcut">Ctrl+4</span>
-              </button>
-              <button class="dropdown-item" data-template="python">
-                <span>Python Template</span>
-                <span class="shortcut">Ctrl+5</span>
-              </button>
-              <button class="dropdown-item" data-template="java">
-                <span>Java Template</span>
-                <span class="shortcut">Ctrl+6</span>
-              </button>
-            </div>
+        <div class="dropdown">
+          <button id="btn-templates" tabindex="-1">Templates</button>
+          <div class="dropdown-content">
+            <button class="dropdown-item" data-template="csharp">
+              <span>C# Template</span>
+              <span class="shortcut">Ctrl+3</span>
+            </button>
+            <button class="dropdown-item" data-template="cpp">
+              <span>C++ Template</span>
+              <span class="shortcut">Ctrl+4</span>
+            </button>
+            <button class="dropdown-item" data-template="python">
+              <span>Python Template</span>
+              <span class="shortcut">Ctrl+5</span>
+            </button>
+            <button class="dropdown-item" data-template="java">
+              <span>Java Template</span>
+              <span class="shortcut">Ctrl+6</span>
+            </button>
           </div>
         </div>
+
+        <button id="btn-run" tabindex="-1">▶ Run</button>
       </div>
       <div id="tab-bar">
         <!-- Tabs will be dynamically added here -->
       </div>
       <div id="editor-container"></div>
     </div>
+
+    <!-- Code Runner Modal -->
+    <div id="runner-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Code Runner</h3>
+          <button id="modal-close" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Input Section -->
+          <div class="input-section">
+            <div class="section-header">
+              <span>Input</span>
+              <button id="toggle-input" class="toggle-btn">▼</button>
+            </div>
+            <textarea
+              id="code-input"
+              class="input-textarea"
+              placeholder="Enter input here (if your program needs it)..."
+            ></textarea>
+          </div>
+
+          <!-- Output Section -->
+          <div class="output-section">
+            <div class="section-header">
+              <span>Output</span>
+            </div>
+            <div id="code-output" class="output-display">
+              <div class="output-placeholder">
+                Click "Run Code" to see output
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-run-code" class="primary-btn">Run Code</button>
+          <button id="btn-clear-output" class="secondary-btn">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="csharp-warning-modal" class="modal csharp-modal">
+      <div class="csharp-modal-content">
+        <h2>C# Not Supported</h2>
+        <p>Unfortunately, the code runner doesn't work on C# at the moment.</p>
+        <button id="csharp-warning-close" class="csharp-modal-btn">OK</button>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

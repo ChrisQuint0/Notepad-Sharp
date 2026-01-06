@@ -8,6 +8,7 @@ import {
   indentWithTab,
 } from "@codemirror/commands";
 import { cpp } from "@codemirror/lang-cpp";
+import { java } from "@codemirror/lang-java";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { open, save, confirm as tauriConfirm } from "@tauri-apps/plugin-dialog";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
@@ -34,6 +35,36 @@ interface FileFilter {
   extensions: string[];
 }
 
+interface PistonExecuteRequest {
+  language: string;
+  version: string;
+  files: Array<{
+    content: string;
+    name?: string; // ← ADD THIS
+  }>;
+  stdin?: string;
+  compile_timeout?: number;
+  run_timeout?: number;
+}
+
+interface PistonExecuteResponse {
+  language: string;
+  version: string;
+  compile?: {
+    stdout: string;
+    stderr: string;
+    code: number;
+    output: string;
+  };
+  run: {
+    stdout: string;
+    stderr: string;
+    code: number | null;
+    signal: string | null;
+    output: string;
+  };
+}
+
 // ============================================================================
 // Constants
 // ============================================================================
@@ -51,12 +82,11 @@ const CODE_TEMPLATES: Record<TemplateType, string> = {
   csharp: `using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 
 class Program {
   static void Main() {
     int n = int.Parse(Console.ReadLine());
-    
+    Console.WriteLine("You entered: " + n);
   }
 }`,
 
@@ -102,6 +132,19 @@ const EDITOR_CONFIG = {
     "// Welcome to Notepad#\n// Start typing your code here...\n\n",
 };
 
+const PISTON_API = {
+  baseUrl: "https://emkc.org/api/v2/piston",
+};
+
+const LANGUAGE_IDS: Record<string, string> = {
+  cs: "csharp",
+  cpp: "cpp",
+  c: "c",
+  py: "python",
+  java: "java",
+  js: "javascript",
+};
+
 // ============================================================================
 // Editor Manager Class
 // ============================================================================
@@ -122,6 +165,16 @@ class EditorManager {
       null,
       EDITOR_CONFIG.welcomeMessage
     );
+  }
+
+  private showCSharpWarningModal(): void {
+    const modal = document.getElementById("csharp-warning-modal");
+    modal?.classList.add("show");
+  }
+
+  private hideCSharpWarningModal(): void {
+    const modal = document.getElementById("csharp-warning-modal");
+    modal?.classList.remove("show");
   }
 
   // ------------------------------------------------------------------------
@@ -434,8 +487,211 @@ class EditorManager {
   }
 
   // ------------------------------------------------------------------------
+  // Code Runner Modal
+  // ------------------------------------------------------------------------
+
+  private showRunnerModal(): void {
+    const modal = document.getElementById("runner-modal");
+    if (modal) {
+      modal.classList.add("show");
+    }
+  }
+
+  private hideRunnerModal(): void {
+    const modal = document.getElementById("runner-modal");
+    if (modal) {
+      modal.classList.remove("show");
+    }
+  }
+
+  private toggleInputSection(): void {
+    const inputTextarea = document.getElementById(
+      "code-input"
+    ) as HTMLTextAreaElement;
+    const toggleBtn = document.getElementById("toggle-input");
+
+    if (inputTextarea && toggleBtn) {
+      inputTextarea.classList.toggle("collapsed");
+      toggleBtn.classList.toggle("collapsed");
+
+      toggleBtn.textContent = inputTextarea.classList.contains("collapsed")
+        ? "▶"
+        : "▼";
+    }
+  }
+
+  private clearOutput(): void {
+    const outputDisplay = document.getElementById("code-output");
+    if (outputDisplay) {
+      outputDisplay.innerHTML =
+        '<div class="output-placeholder">Click "Run Code" to see output</div>';
+    }
+  }
+
+  private displayOutput(
+    text: string,
+    type: "running" | "success" | "error" = "success"
+  ): void {
+    const outputDisplay = document.getElementById("code-output");
+    if (outputDisplay) {
+      outputDisplay.className = `output-display output-${type}`;
+      outputDisplay.textContent = text;
+    }
+  }
+
+  // ------------------------------------------------------------------------
+  // Code Execution
+  // ------------------------------------------------------------------------
+
+  private getLanguageId(filePath: string | null): string {
+    if (!filePath) return "";
+    const ext = filePath.split(".").pop()?.toLowerCase() || "";
+    return LANGUAGE_IDS[ext] || "";
+  }
+
+  private async runCode(): Promise<void> {
+    if (this.activeTabId === null) {
+      this.displayOutput("No active file to run!", "error");
+      return;
+    }
+
+    const activeTab = this.findTabById(this.activeTabId);
+    if (!activeTab) {
+      this.displayOutput("Could not find active tab!", "error");
+      return;
+    }
+
+    const language = this.getLanguageId(activeTab.path);
+    if (!language) {
+      this.displayOutput(
+        "Unsupported file type! Supported: .cs, .cpp, .c, .py, .java, .js",
+        "error"
+      );
+      return;
+    }
+
+    if (language === "csharp") {
+      this.showCSharpWarningModal();
+      return;
+    }
+
+    const inputTextarea = document.getElementById(
+      "code-input"
+    ) as HTMLTextAreaElement;
+
+    const runButton = document.getElementById(
+      "btn-run-code"
+    ) as HTMLButtonElement;
+    if (runButton) {
+      runButton.disabled = true;
+      runButton.textContent = "Running...";
+    }
+
+    this.displayOutput("Executing code...", "running");
+
+    try {
+      const code = this.editorView.state.doc.toString();
+      const stdin = inputTextarea?.value || "";
+
+      if (this.expectsInput(code) && !stdin.trim()) {
+        this.displayOutput(
+          "This program is waiting for input.\n\nPlease provide input in the Input box before running.",
+          "error"
+        );
+        return;
+      }
+
+      const result = await this.executeWithPiston(language, code, stdin);
+      this.displayPistonResult(result);
+    } catch (error) {
+      console.error("Code execution error:", error);
+      this.displayOutput(
+        `Error: ${
+          error instanceof Error ? error.message : "Failed to execute code"
+        }`,
+        "error"
+      );
+    } finally {
+      if (runButton) {
+        runButton.disabled = false;
+        runButton.textContent = "Run Code";
+      }
+    }
+  }
+
+  // Piston for other languages
+  private async executeWithPiston(
+    language: string,
+    code: string,
+    stdin: string
+  ): Promise<PistonExecuteResponse> {
+    const formattedStdin = stdin
+      ? stdin.endsWith("\n")
+        ? stdin
+        : stdin + "\n"
+      : "";
+
+    const isCSharp = language === "csharp";
+
+    const payload: PistonExecuteRequest = {
+      language,
+      version: "*",
+      files: [{ name: "Program.cs", content: code }],
+      stdin: formattedStdin || undefined,
+      compile_timeout: 20000,
+      run_timeout: isCSharp ? 20000 : 5000,
+    };
+
+    const response = await fetch(`${PISTON_API.baseUrl}/execute`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("Piston error:", err);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  private displayPistonResult(result: PistonExecuteResponse): void {
+    let output = "";
+    let type: "success" | "error" = "success";
+
+    if (result.run.signal === "SIGKILL") {
+      type = "error";
+      output = "⚠️ Program terminated (timeout or waiting for input)\n";
+      if (result.run.stdout) output += `\nOutput:\n${result.run.stdout}`;
+    } else if (result.compile && result.compile.code !== 0) {
+      type = "error";
+      output = "❌ Compilation Failed\n\n";
+      output += result.compile.stderr || result.compile.output || "";
+    } else if (result.run.code === 0 || result.run.code === null) {
+      type = "success";
+      output =
+        result.run.stdout ||
+        result.run.output ||
+        "✓ Program executed successfully (No output)";
+    } else {
+      type = "error";
+      output = `❌ Runtime Error (Exit Code: ${result.run.code})\n\n`;
+      if (result.run.stderr) output += result.run.stderr;
+      if (result.run.stdout) output += `\nOutput:\n${result.run.stdout}`;
+    }
+
+    this.displayOutput(output, type);
+  }
+
+  // ------------------------------------------------------------------------
   // Helper Methods
   // ------------------------------------------------------------------------
+
+  private expectsInput(code: string): boolean {
+    return /Console\.ReadLine\s*\(/.test(code);
+  }
 
   private findTabById(id: number): Tab | undefined {
     return this.tabs.find((t) => t.id === id);
@@ -443,7 +699,6 @@ class EditorManager {
 
   private saveCurrentTabContent(): void {
     if (this.activeTabId === null) return;
-
     const currentTab = this.findTabById(this.activeTabId);
     if (currentTab) {
       currentTab.content = this.editorView.state.doc.toString();
@@ -469,20 +724,23 @@ class EditorManager {
 
   private getLanguageExtension(filePath: string | null) {
     if (!filePath) return [];
-
     const ext = filePath.split(".").pop()?.toLowerCase();
 
     switch (ext) {
       case "cs":
+        return [cpp()];
       case "cpp":
+        return [cpp()];
       case "c":
+        return [cpp()];
       case "h":
         return [cpp()];
-      case "txt":
-      case "md":
-        return [];
-      default:
+      case "java":
+        return [java()];
+      case "py":
         return [cpp()];
+      default:
+        return [];
     }
   }
 
@@ -493,16 +751,12 @@ class EditorManager {
   private async confirmClose(tabName: string): Promise<boolean> {
     return await tauriConfirm(
       `Your changes will be lost if you don't save them.`,
-      {
-        title: `Close ${tabName}?`,
-        kind: "warning",
-      }
+      { title: `Close ${tabName}?`, kind: "warning" }
     );
   }
 
   private markActiveTabModified(): void {
     if (this.activeTabId === null) return;
-
     const activeTab = this.findTabById(this.activeTabId);
     if (activeTab) {
       activeTab.modified = true;
@@ -517,49 +771,77 @@ class EditorManager {
   private initializeUI(): void {
     this.setupButtonHandlers();
     this.setupDropdownHandlers();
+    this.setupModalHandlers();
     this.setupKeyboardShortcuts();
+    document
+      .getElementById("csharp-warning-close")
+      ?.addEventListener("click", () => this.hideCSharpWarningModal());
   }
 
   private setupButtonHandlers(): void {
-    document.getElementById("btn-new")?.addEventListener("click", () => {
-      this.createNewTab();
-    });
+    document
+      .getElementById("btn-new")
+      ?.addEventListener("click", () => this.createNewTab());
+    document
+      .getElementById("btn-open")
+      ?.addEventListener("click", () => this.openFile());
+    document
+      .getElementById("btn-save")
+      ?.addEventListener("click", () => this.saveFile());
+    document
+      .getElementById("btn-run")
+      ?.addEventListener("click", () => this.showRunnerModal());
+  }
 
-    document.getElementById("btn-open")?.addEventListener("click", () => {
-      this.openFile();
+  private setupModalHandlers(): void {
+    document
+      .getElementById("modal-close")
+      ?.addEventListener("click", () => this.hideRunnerModal());
+    document.getElementById("runner-modal")?.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).id === "runner-modal") {
+        this.hideRunnerModal();
+      }
     });
-
-    document.getElementById("btn-save")?.addEventListener("click", () => {
-      this.saveFile();
-    });
+    document
+      .getElementById("toggle-input")
+      ?.addEventListener("click", () => this.toggleInputSection());
+    document
+      .getElementById("btn-clear-output")
+      ?.addEventListener("click", () => this.clearOutput());
+    document
+      .getElementById("btn-run-code")
+      ?.addEventListener("click", () => this.runCode());
   }
 
   private setupDropdownHandlers(): void {
     document.getElementById("btn-templates")?.addEventListener("click", (e) => {
       e.stopPropagation();
-      const dropdown = document.querySelector(".dropdown-content");
-      dropdown?.classList.toggle("show");
+      document.querySelector(".dropdown-content")?.classList.toggle("show");
     });
-
     document.addEventListener("click", () => {
-      const dropdown = document.querySelector(".dropdown-content");
-      dropdown?.classList.remove("show");
+      document.querySelector(".dropdown-content")?.classList.remove("show");
     });
-
     document.querySelectorAll(".dropdown-item").forEach((item) => {
       item.addEventListener("click", (e) => {
         const templateType = (e.target as HTMLElement).getAttribute(
           "data-template"
         ) as TemplateType;
-        if (templateType) {
-          this.insertTemplate(templateType);
-        }
+        if (templateType) this.insertTemplate(templateType);
       });
     });
   }
 
   private setupKeyboardShortcuts(): void {
     document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        const modal = document.getElementById("runner-modal");
+        if (modal?.classList.contains("show")) {
+          e.preventDefault();
+          this.hideRunnerModal();
+          return;
+        }
+      }
+
       if (!e.ctrlKey) return;
 
       const shortcuts: Record<string, () => void> = {
@@ -577,6 +859,12 @@ class EditorManager {
         Tab: () => this.switchToNextTab(),
       };
 
+      if (e.altKey && e.key === "n") {
+        e.preventDefault();
+        this.showRunnerModal();
+        return;
+      }
+
       const handler = shortcuts[e.key];
       if (handler) {
         e.preventDefault();
@@ -591,5 +879,4 @@ class EditorManager {
 // ============================================================================
 
 new EditorManager();
-
 console.log("Notepad# initialized successfully");

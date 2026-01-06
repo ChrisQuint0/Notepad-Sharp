@@ -64,6 +64,20 @@ body {
   background: #1e1e1e;
 }
 
+#btn-run {
+  background: #0e639c;
+  color: white;
+  margin-left: 8px;
+}
+
+#btn-run:hover {
+  background: #1177bb;
+}
+
+#btn-run:active {
+  background: #0d5a8f;
+}
+
 #editor-container {
   flex: 1;
   overflow: hidden;
@@ -167,7 +181,6 @@ body {
 .dropdown {
   position: relative;
   display: inline-block;
-  margin-left: auto;
 }
 
 .dropdown-content {
@@ -223,4 +236,347 @@ body {
   color: #858585;
   font-size: 11px;
   margin-left: 20px;
+}
+
+/* ============================================================================ */
+/* Modal Styles */
+/* ============================================================================ */
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  animation: fadeIn 0.2s ease;
+}
+
+.modal.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: #21252b;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #181a1f;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #abb2bf;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #969696;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  background: #2a2d2e;
+  color: #abb2bf;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Input Section */
+.input-section {
+  background: #282c34;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #181a1f;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #1e2127;
+  border-bottom: 1px solid #181a1f;
+  font-size: 13px;
+  font-weight: 500;
+  color: #abb2bf;
+}
+
+.toggle-btn {
+  background: transparent;
+  border: none;
+  color: #969696;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.toggle-btn:hover {
+  color: #abb2bf;
+}
+
+.toggle-btn.collapsed {
+  transform: rotate(-90deg);
+}
+
+.input-textarea {
+  width: 100%;
+  min-height: 100px;
+  max-height: 200px;
+  padding: 12px;
+  background: #282c34;
+  color: #abb2bf;
+  border: none;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+}
+
+.input-textarea.collapsed {
+  display: none;
+}
+
+.input-textarea::placeholder {
+  color: #5c6370;
+}
+
+/* Output Section */
+.output-section {
+  background: #282c34;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #181a1f;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+.output-display {
+  flex: 1;
+  padding: 12px;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 13px;
+  overflow-y: auto;
+  background: #282c34;
+}
+
+.output-placeholder {
+  color: #5c6370;
+}
+
+.output-running {
+  color: #61afef;
+}
+
+.output-success {
+  color: #98c379;
+}
+
+.output-error {
+  color: #e06c75;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid #181a1f;
+  justify-content: flex-end;
+}
+
+.primary-btn {
+  background: #0e639c;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.1s ease;
+}
+
+.primary-btn:hover {
+  background: #1177bb;
+}
+
+.primary-btn:active {
+  background: #0d5a8f;
+}
+
+.primary-btn:disabled {
+  background: #3a3d41;
+  color: #5c6370;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  background: transparent;
+  color: #cccccc;
+  border: 1px solid #3e3e42;
+  padding: 8px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.1s ease;
+}
+
+.secondary-btn:hover {
+  background: #2a2d2e;
+}
+
+.secondary-btn:active {
+  background: #1e1e1e;
+}
+
+/* Scrollbar Styles */
+.modal-body::-webkit-scrollbar,
+.output-display::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track,
+.output-display::-webkit-scrollbar-track {
+  background: #21252b;
+}
+
+.modal-body::-webkit-scrollbar-thumb,
+.output-display::-webkit-scrollbar-thumb {
+  background: #4e5157;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover,
+.output-display::-webkit-scrollbar-thumb:hover {
+  background: #5c6370;
+}
+
+/* ============================================================================ */
+/* C# Warning Modal (Differentiated) */
+/* ============================================================================ */
+
+.csharp-modal {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.csharp-modal-content {
+  background: linear-gradient(145deg, #21252b, #1b1e24);
+  border: 1px solid #3e3e42;
+  border-left: 5px solid #e06c75; /* warning accent */
+  border-radius: 6px;
+  padding: 24px 28px;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: csharpPop 0.25s ease;
+}
+
+@keyframes csharpPop {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.csharp-modal-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.csharp-modal-content h2 {
+  color: #e06c75;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.csharp-modal-content p {
+  color: #abb2bf;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.csharp-modal-btn {
+  background: #2c313a;
+  color: #abb2bf;
+  border: 1px solid #3e3e42;
+  padding: 8px 22px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.csharp-modal-btn:hover {
+  background: #3a3f4b;
+  color: #ffffff;
+}
+
+.csharp-modal-btn:active {
+  background: #1e2127;
 }

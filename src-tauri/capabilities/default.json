@@ -12,6 +12,18 @@
     "fs:allow-write-file",
     "fs:allow-read-text-file",
     "fs:allow-write-text-file",
-    "fs:default"
+    "fs:default",
+    "http:default",
+    {
+      "identifier": "http:allow-fetch",
+      "allow": [
+        {
+          "url": "https://api.jdoodle.com/*"
+        },
+        {
+          "url": "https://emkc.org/*"
+        }
+      ]
+    }
   ]
 }
