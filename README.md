@@ -2,6 +2,12 @@
 
 Built for Christopher Quinto's Potato Laptop, Notepad# is a lightweight, minimalist desktop code notepad built with Vite + TypeScript + Tauri. It gives you a distraction-free UI, multi-tab editing, quick templates for common competitive-programming languages, and a simple code runner powered by the public Piston API.
 
+![Notepad-Sharp Preview](preview.png)
+
+## Website:
+
+https://notepad-sharp.vercel.app/
+
 ## What it does
 
 - Multi-tab editor with modified-state badges and title updates.
