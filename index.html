@@ -9,9 +9,36 @@
   <body>
     <div id="app">
       <div id="toolbar">
-        <button id="btn-open">Open</button>
-        <button id="btn-save">Save</button>
-        <button id="btn-new">New</button>
+        <div id="toolbar">
+          <button id="btn-new" tabindex="-1">New</button>
+          <button id="btn-open" tabindex="-1">Open</button>
+          <button id="btn-save" tabindex="-1">Save</button>
+
+          <div class="dropdown">
+            <button id="btn-templates" tabindex="-1">Templates</button>
+            <div class="dropdown-content">
+              <button class="dropdown-item" data-template="csharp">
+                <span>C# Template</span>
+                <span class="shortcut">Ctrl+3</span>
+              </button>
+              <button class="dropdown-item" data-template="cpp">
+                <span>C++ Template</span>
+                <span class="shortcut">Ctrl+4</span>
+              </button>
+              <button class="dropdown-item" data-template="python">
+                <span>Python Template</span>
+                <span class="shortcut">Ctrl+5</span>
+              </button>
+              <button class="dropdown-item" data-template="java">
+                <span>Java Template</span>
+                <span class="shortcut">Ctrl+6</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="tab-bar">
+        <!-- Tabs will be dynamically added here -->
       </div>
       <div id="editor-container"></div>
     </div>
