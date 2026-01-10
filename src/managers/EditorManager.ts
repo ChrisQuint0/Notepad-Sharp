@@ -24,6 +24,9 @@ import { EDITOR_CONFIG } from "../constants";
 import type { TemplateType } from "../types";
 import { getLanguageExtension, getLanguageId } from "../utils/languageDetector";
 import { expectsInput, extractFileName } from "../utils/helpers";
+import { bracketMatching } from "@codemirror/language";
+import { indentationMarkers } from "@replit/codemirror-indentation-markers";
+import { foldGutter, foldKeymap } from "@codemirror/language";
 
 export class EditorManager {
   private tabManager: TabManager;
@@ -91,14 +94,18 @@ export class EditorManager {
       doc: "",
       extensions: [
         lineNumbers(),
+        foldGutter(),
         EditorView.lineWrapping,
         history(),
         keymap.of([
           ...defaultKeymap,
+          ...foldKeymap,
           indentWithTab,
           { key: "Mod-z", run: undo },
           { key: "Mod-y", run: redo },
         ]),
+        bracketMatching(),
+        indentationMarkers(),
         this.languageConf.of([]),
         oneDark,
         EditorState.tabSize.of(EDITOR_CONFIG.tabSize),
