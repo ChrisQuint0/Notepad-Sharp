@@ -23,12 +23,10 @@
     "@tauri-apps/plugin-fs": "^2.4.4",
     "@tauri-apps/plugin-http": "^2.5.4",
     "@tauri-apps/plugin-opener": "^2",
-    "dotenv": "^17.2.3",
-    "js-beautify": "^1.15.4"
+    "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
-    "@types/js-beautify": "^1.14.3",
     "typescript": "~5.6.2",
     "vite": "^6.0.3"
   }

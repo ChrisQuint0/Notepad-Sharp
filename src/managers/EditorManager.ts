@@ -23,7 +23,6 @@ import { EventHandlers } from "../ui/EventHandlers";
 import { EDITOR_CONFIG } from "../constants";
 import type { TemplateType } from "../types";
 import { getLanguageExtension, getLanguageId } from "../utils/languageDetector";
-import { formatCode, shouldFormat } from "../utils/codeFormatter";
 import { expectsInput, extractFileName } from "../utils/helpers";
 
 export class EditorManager {
@@ -65,7 +64,6 @@ export class EditorManager {
       onInsertTemplate: (type) => this.insertTemplate(type),
       onCloseActiveTab: () => this.closeActiveTab(),
       onSwitchNextTab: () => this.switchToNextTab(),
-      onFormatAndSave: () => this.formatAndSave(),
       onHideCSharpWarning: () => this.modalManager.hideCSharpWarningModal(),
     });
 
@@ -262,39 +260,6 @@ export class EditorManager {
     if (activeTab) {
       this.tabManager.markTabModified(activeTab.id);
       this.renderTabs();
-    }
-  }
-
-  // ========================================================================
-  // Code Formatting
-  // ========================================================================
-
-  public formatAndSave(): void {
-    this.formatCodeInEditor();
-    this.saveFile();
-  }
-
-  private formatCodeInEditor(): void {
-    const activeTab = this.tabManager.getActiveTab();
-    if (!activeTab || !shouldFormat(activeTab.path)) {
-      console.log("Auto-format only works for .cs files");
-      return;
-    }
-
-    const currentCode = this.editorView.state.doc.toString();
-    const formatted = formatCode(currentCode);
-
-    if (formatted !== currentCode) {
-      this.editorView.dispatch({
-        changes: {
-          from: 0,
-          to: this.editorView.state.doc.length,
-          insert: formatted,
-        },
-      });
-
-      this.tabManager.updateTabContent(activeTab.id, formatted);
-      console.log("Code formatted!");
     }
   }
 

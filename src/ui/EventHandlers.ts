@@ -14,7 +14,6 @@ interface EventCallbacks {
   onInsertTemplate: (type: TemplateType) => void;
   onCloseActiveTab: () => void;
   onSwitchNextTab: () => void;
-  onFormatAndSave: () => void;
   onHideCSharpWarning: () => void;
 }
 
@@ -129,7 +128,7 @@ export class EventHandlers {
         "4": () => this.callbacks.onInsertTemplate("cpp"),
         "5": () => this.callbacks.onInsertTemplate("python"),
         "6": () => this.callbacks.onInsertTemplate("java"),
-        s: () => this.callbacks.onFormatAndSave(),
+        s: () => this.callbacks.onSaveFile(),
         o: () => this.callbacks.onOpenFile(),
         n: () => this.callbacks.onNewFile(),
         w: () => this.callbacks.onCloseActiveTab(),

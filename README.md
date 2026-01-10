@@ -14,9 +14,8 @@ https://notepad-sharp.vercel.app/
 - Syntax highlighting via CodeMirror (C/C++, Java, basic support for other extensions).
 - File open/save backed by Tauri FS + dialog plugins with language filters.
 - One-click language templates (C#, C++, Python, Java) and keyboard shortcuts for each.
-- “Format & Save” for `.cs` files using js-beautify.
 - Code runner modal with input/output panes, basic input detection, and execution through Piston (C/C++/Java/Python/JS; C# execution is blocked and shows a warning).
-- Minimal shortcuts: Ctrl+S: format+save, Ctrl+O: open, Ctrl+N: new tab, Ctrl+W: close tab, Ctrl+Tab: next tab, Alt+N: open runner, Ctrl+3/4/5/6: insert templates.
+- Minimal shortcuts: Ctrl+S: save, Ctrl+O: open, Ctrl+N: new tab, Ctrl+W: close tab, Ctrl+Tab: next tab, Alt+N: open runner, Ctrl+3/4/5/6: insert templates.
 
 ## Tech stack
 
