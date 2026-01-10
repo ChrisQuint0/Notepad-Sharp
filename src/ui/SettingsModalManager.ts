@@ -2,8 +2,8 @@
 
 import { EditorState } from "@codemirror/state";
 import { EditorView, lineNumbers } from "@codemirror/view";
-import { defaultKeymap, history } from "@codemirror/commands";
 import { cpp } from "@codemirror/lang-cpp";
+import { history } from "@codemirror/commands";
 import { SettingsManager } from "../managers/SettingsManager";
 import { AVAILABLE_THEMES, getThemeExtension } from "../utils/themeUtils";
 
@@ -14,7 +14,8 @@ export class SettingsModalManager {
   private pendingChanges: Map<string, string> = new Map();
   private onTemplatesChanged: () => void;
   private onThemeChanged: (theme: string) => void;
-  private currentActiveTab: "templates" | "appearance" = "templates";
+  // @ts-ignore
+  private _currentActiveTab: "templates" | "appearance" = "templates";
 
   constructor(
     settingsManager: SettingsManager,
@@ -115,7 +116,7 @@ export class SettingsModalManager {
   showSettingsModal(): void {
     this.pendingChanges.clear();
     this.currentEditingKey = null;
-    this.currentActiveTab = "templates";
+    this._currentActiveTab = "templates";
     this.switchTab("templates");
     this.renderTemplateList();
     this.setupThemeChangeHandler();
@@ -172,7 +173,7 @@ export class SettingsModalManager {
   }
 
   private switchTab(tab: "templates" | "appearance"): void {
-    this.currentActiveTab = tab;
+    this._currentActiveTab = tab;
 
     // Update tab buttons
     const templatesTab = document.getElementById("settings-tab-templates");

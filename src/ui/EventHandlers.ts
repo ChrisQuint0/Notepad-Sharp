@@ -1,6 +1,5 @@
 // src/ui/EventHandlers.ts
 
-import type { TemplateType } from "../types";
 import { SettingsManager } from "../managers/SettingsManager";
 
 interface EventCallbacks {

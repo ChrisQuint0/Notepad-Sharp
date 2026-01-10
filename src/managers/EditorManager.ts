@@ -22,7 +22,6 @@ import { SettingsModalManager } from "../ui/SettingsModalManager";
 import { EventHandlers } from "../ui/EventHandlers";
 
 import { EDITOR_CONFIG } from "../constants";
-import type { TemplateType } from "../types";
 import { getLanguageExtension, getLanguageId } from "../utils/languageDetector";
 import { expectsInput, extractFileName } from "../utils/helpers";
 import { getThemeExtension } from "../utils/themeUtils";

@@ -1,7 +1,6 @@
 // src/services/TemplateService.ts
 
 import { SettingsManager } from "../managers/SettingsManager";
-import type { TemplateType } from "../types";
 
 export class TemplateService {
   private settingsManager: SettingsManager;
@@ -15,6 +14,8 @@ export class TemplateService {
   }
 
   getAllTemplateTypes(): string[] {
-    return this.settingsManager.getAllTemplateKeys();
+    return this.settingsManager
+      .getAllTemplates()
+      .map((template: any) => template.key);
   }
 }
