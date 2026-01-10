@@ -15,6 +15,22 @@
     "fs:default",
     "http:default",
     {
+      "identifier": "fs:allow-exists",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-rename",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
+    {
       "identifier": "http:allow-fetch",
       "allow": [
         {

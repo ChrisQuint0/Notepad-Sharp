@@ -51,7 +51,8 @@ export class EditorManager {
     // Initialize tab renderer
     this.tabRenderer = new TabRenderer(
       (id) => this.switchToTab(id),
-      (id) => this.closeTab(id)
+      (id) => this.closeTab(id),
+      (id, newName) => this.renameTab(id, newName)
     );
 
     // Initialize event handlers
@@ -68,6 +69,7 @@ export class EditorManager {
       onCloseActiveTab: () => this.closeActiveTab(),
       onSwitchNextTab: () => this.switchToNextTab(),
       onHideCSharpWarning: () => this.modalManager.hideCSharpWarningModal(),
+      onRenameActiveTab: () => this.renameActiveTab(),
     });
 
     // Initialize editor
@@ -197,6 +199,56 @@ export class EditorManager {
       this.updateLanguage(activeTab.path);
       this.renderTabs();
       this.updateTitle(activeTab.name);
+    }
+  }
+
+  public renameActiveTab(): void {
+    const activeTabId = this.tabManager.getActiveTabId();
+    if (activeTabId !== null) {
+      this.tabRenderer.startRenaming(activeTabId);
+    }
+  }
+
+  public async renameTab(tabId: number, newName: string): Promise<void> {
+    try {
+      const tab = this.tabManager.findTabById(tabId);
+      if (!tab) return;
+
+      // If tab has a file path, rename the actual file
+      if (tab.path) {
+        const newPath = this.fileService.getNewPath(tab.path, newName);
+        await this.fileService.renameFile(tab.path, newPath);
+
+        // Update tab with new path and name
+        this.tabManager.updateTabPath(tabId, newPath, newName);
+
+        // Update language highlighting if extension changed
+        this.updateLanguage(newPath);
+      } else {
+        // Just rename the tab (unsaved file)
+        this.tabManager.updateTabName(tabId, newName);
+
+        // Update language highlighting based on new name
+        this.updateLanguage(newName);
+      }
+
+      this.renderTabs();
+
+      // Update title if this is the active tab
+      if (this.tabManager.getActiveTabId() === tabId) {
+        this.updateTitle(newName);
+      }
+
+      console.log("File renamed successfully!");
+    } catch (error) {
+      console.error("Error renaming file:", error);
+      console.error(
+        `Failed to rename file: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+      // Re-render to restore original name
+      this.renderTabs();
     }
   }
 

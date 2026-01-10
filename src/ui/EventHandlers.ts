@@ -15,6 +15,7 @@ interface EventCallbacks {
   onCloseActiveTab: () => void;
   onSwitchNextTab: () => void;
   onHideCSharpWarning: () => void;
+  onRenameActiveTab: () => void;
 }
 
 export class EventHandlers {
@@ -103,6 +104,13 @@ export class EventHandlers {
 
   private setupKeyboardShortcuts(): void {
     document.addEventListener("keydown", (e) => {
+      // F2 - Rename active tab
+      if (e.key === "F2") {
+        e.preventDefault();
+        this.callbacks.onRenameActiveTab();
+        return;
+      }
+
       // Escape key
       if (e.key === "Escape") {
         const modal = document.getElementById("runner-modal");

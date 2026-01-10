@@ -119,6 +119,13 @@ export class TabManager {
     }
   }
 
+  updateTabName(tabId: number, name: string): void {
+    const tab = this.findTabById(tabId);
+    if (tab) {
+      tab.name = name;
+    }
+  }
+
   markTabModified(tabId: number): void {
     const tab = this.findTabById(tabId);
     if (tab) {

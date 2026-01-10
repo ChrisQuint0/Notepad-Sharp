@@ -607,3 +607,22 @@ body {
 .csharp-modal-btn:active {
   background: #1e2127;
 }
+
+/* Tab rename input */
+.tab-name-input {
+  background: #282c34;
+  color: #abb2bf;
+  border: 1px solid #61afef;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 13px;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  outline: none;
+  flex: 1;
+  min-width: 60px;
+}
+
+.tab-name-input:focus {
+  border-color: #61afef;
+  box-shadow: 0 0 0 1px #61afef;
+}

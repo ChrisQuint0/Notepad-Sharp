@@ -1,7 +1,7 @@
 // src/services/FileService.ts
 
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import { readTextFile, writeTextFile, rename } from "@tauri-apps/plugin-fs";
 import { FILE_FILTERS } from "../constants";
 import type { FileOperationResult } from "../types";
 import { extractFileName } from "../utils/helpers";
@@ -44,5 +44,20 @@ export class FileService {
       console.error("Error prompting save location:", error);
       return null;
     }
+  }
+
+  async renameFile(oldPath: string, newPath: string): Promise<void> {
+    try {
+      await rename(oldPath, newPath);
+    } catch (error) {
+      console.error("Error renaming file:", error);
+      throw error;
+    }
+  }
+
+  getNewPath(oldPath: string, newFileName: string): string {
+    const pathParts = oldPath.split(/[/\\]/);
+    pathParts[pathParts.length - 1] = newFileName;
+    return pathParts.join(oldPath.includes("\\") ? "\\" : "/");
   }
 }
