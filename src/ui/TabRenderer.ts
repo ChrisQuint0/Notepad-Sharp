@@ -67,24 +67,44 @@ export class TabRenderer {
 
       if (save && newName && newName !== currentName) {
         await this.onTabRename(tabId, newName);
+      } else {
+        // Just restore the original name without saving
+        nameSpan.style.display = "";
+        input.remove();
       }
 
       this.editingTabId = null;
     };
 
-    input.addEventListener("blur", () => finishEditing(true));
+    // Only save on Enter key
     input.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
+        e.stopPropagation();
         await finishEditing(true);
       } else if (e.key === "Escape") {
         e.preventDefault();
+        e.stopPropagation();
         await finishEditing(false);
       }
     });
 
+    // Click outside to cancel (not save)
+    const handleClickOutside = async (e: MouseEvent) => {
+      if (!input.contains(e.target as Node)) {
+        await finishEditing(false);
+        document.removeEventListener("mousedown", handleClickOutside);
+      }
+    };
+
+    // Use mousedown instead of click, and add a small delay to avoid immediate trigger
+    setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+    }, 100);
+
     // Prevent tab from losing focus when clicking input
     input.addEventListener("mousedown", (e) => e.stopPropagation());
+    input.addEventListener("click", (e) => e.stopPropagation());
   }
 
   private createTabElement(
@@ -95,7 +115,12 @@ export class TabRenderer {
     tabEl.className = this.getTabClasses(tab, activeTabId);
     tabEl.setAttribute("tabindex", "-1");
     tabEl.setAttribute("data-tab-id", tab.id.toString());
-    tabEl.onclick = () => this.onTabClick(tab.id);
+    tabEl.onclick = () => {
+      // Don't switch tabs if we're editing
+      if (this.editingTabId === null) {
+        this.onTabClick(tab.id);
+      }
+    };
 
     // Add double-click handler
     tabEl.ondblclick = (e) => {
