@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Notepad#</title>
-
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
@@ -13,7 +12,6 @@
         <button id="btn-new" tabindex="-1">New</button>
         <button id="btn-open" tabindex="-1">Open</button>
         <button id="btn-save" tabindex="-1">Save</button>
-
         <div class="dropdown">
           <button id="btn-templates" tabindex="-1">Templates</button>
           <div class="dropdown-content">
@@ -35,7 +33,7 @@
             </button>
           </div>
         </div>
-
+        <button id="btn-settings" tabindex="-1">Settings</button>
         <button id="btn-run" tabindex="-1">▶ Run</button>
       </div>
       <div id="tab-bar">
@@ -51,7 +49,6 @@
           <h3>Code Runner</h3>
           <button id="modal-close" class="close-btn">&times;</button>
         </div>
-
         <div class="modal-body">
           <!-- Input Section -->
           <div class="input-section">
@@ -65,7 +62,6 @@
               placeholder="Enter input here (if your program needs it)..."
             ></textarea>
           </div>
-
           <!-- Output Section -->
           <div class="output-section">
             <div class="section-header">
@@ -78,7 +74,6 @@
             </div>
           </div>
         </div>
-
         <div class="modal-footer">
           <button id="btn-run-code" class="primary-btn">Run Code</button>
           <button id="btn-clear-output" class="secondary-btn">Clear</button>
@@ -86,11 +81,137 @@
       </div>
     </div>
 
+    <!-- C# Warning Modal -->
     <div id="csharp-warning-modal" class="modal csharp-modal">
       <div class="csharp-modal-content">
         <h2>C# Not Supported</h2>
         <p>Unfortunately, the code runner doesn't work on C# at the moment.</p>
         <button id="csharp-warning-close" class="csharp-modal-btn">OK</button>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+      <div class="modal-content settings-modal-content">
+        <div class="modal-header">
+          <h3>Template Settings</h3>
+          <button id="settings-close" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body settings-body">
+          <!-- Template List Sidebar -->
+          <div class="settings-sidebar">
+            <div class="settings-section-header">
+              <h4>Templates</h4>
+              <button
+                id="add-template-btn"
+                class="icon-btn"
+                title="Add New Template"
+              >
+                +
+              </button>
+            </div>
+            <div id="template-list" class="template-list">
+              <!-- Templates will be dynamically inserted here -->
+            </div>
+          </div>
+
+          <!-- Template Editor -->
+          <div class="settings-editor">
+            <div id="template-editor-header" class="template-editor-header">
+              <input
+                id="template-name-input"
+                type="text"
+                class="template-name-edit"
+                placeholder="Template Name"
+                readonly
+              />
+              <div class="template-actions">
+                <button
+                  id="reset-template-btn"
+                  class="secondary-btn small-btn"
+                  style="display: none"
+                >
+                  Reset to Default
+                </button>
+                <button
+                  id="delete-template-btn"
+                  class="danger-btn small-btn"
+                  style="display: none"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="template-editor-container"
+              class="template-editor-container"
+            >
+              <div class="template-placeholder">
+                Select a template to edit or create a new one
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="save-settings-btn" class="primary-btn">
+            Save Changes
+          </button>
+          <button id="cancel-settings-btn" class="secondary-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Template Modal -->
+    <div id="add-template-modal" class="modal">
+      <div class="modal-content small-modal-content">
+        <div class="modal-header">
+          <h3>Add New Template</h3>
+          <button id="add-template-close" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="new-template-key">Template Key (identifier)</label>
+            <input
+              type="text"
+              id="new-template-key"
+              class="form-input"
+              placeholder="e.g., javascript, rust, html"
+              pattern="[a-z0-9-]+"
+            />
+            <small class="form-hint"
+              >Use lowercase letters, numbers, and hyphens only</small
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="new-template-name">Display Name</label>
+            <input
+              type="text"
+              id="new-template-name"
+              class="form-input"
+              placeholder="e.g., JavaScript Template"
+            />
+          </div>
+
+          <div
+            id="add-template-error"
+            class="error-message"
+            style="display: none"
+          ></div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="confirm-add-template-btn" class="primary-btn">
+            Add Template
+          </button>
+          <button id="cancel-add-template-btn" class="secondary-btn">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
 

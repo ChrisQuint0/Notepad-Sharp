@@ -1,14 +1,20 @@
 // src/services/TemplateService.ts
 
-import { CODE_TEMPLATES } from "../constants";
+import { SettingsManager } from "../managers/SettingsManager";
 import type { TemplateType } from "../types";
 
 export class TemplateService {
-  getTemplate(templateType: TemplateType): string | null {
-    return CODE_TEMPLATES[templateType] || null;
+  private settingsManager: SettingsManager;
+
+  constructor(settingsManager: SettingsManager) {
+    this.settingsManager = settingsManager;
   }
 
-  getAllTemplateTypes(): TemplateType[] {
-    return Object.keys(CODE_TEMPLATES) as TemplateType[];
+  getTemplate(templateType: string): string | null {
+    return this.settingsManager.getTemplate(templateType) || null;
+  }
+
+  getAllTemplateTypes(): string[] {
+    return this.settingsManager.getAllTemplateKeys();
   }
 }

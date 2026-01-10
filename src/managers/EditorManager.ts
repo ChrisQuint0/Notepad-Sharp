@@ -13,11 +13,13 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import { Compartment } from "@codemirror/state";
 
 import { TabManager } from "./TabManager";
+import { SettingsManager } from "./SettingsManager";
 import { FileService } from "../services/FileService";
 import { PistonService } from "../services/PistonService";
 import { TemplateService } from "../services/TemplateService";
 import { TabRenderer } from "../ui/TabRenderer";
 import { ModalManager } from "../ui/ModalManager";
+import { SettingsModalManager } from "../ui/SettingsModalManager";
 import { EventHandlers } from "../ui/EventHandlers";
 
 import { EDITOR_CONFIG } from "../constants";
@@ -30,11 +32,13 @@ import { foldGutter, foldKeymap } from "@codemirror/language";
 
 export class EditorManager {
   private tabManager: TabManager;
+  private settingsManager: SettingsManager;
   private fileService: FileService;
   private pistonService: PistonService;
   private templateService: TemplateService;
   private tabRenderer: TabRenderer;
   private modalManager: ModalManager;
+  private settingsModalManager: SettingsModalManager;
   private eventHandlers: EventHandlers;
 
   private editorView: EditorView;
@@ -43,10 +47,15 @@ export class EditorManager {
   constructor() {
     // Initialize services and managers
     this.tabManager = new TabManager();
+    this.settingsManager = new SettingsManager();
     this.fileService = new FileService();
     this.pistonService = new PistonService();
-    this.templateService = new TemplateService();
+    this.templateService = new TemplateService(this.settingsManager);
     this.modalManager = new ModalManager();
+    this.settingsModalManager = new SettingsModalManager(
+      this.settingsManager,
+      () => this.handleTemplatesChanged()
+    );
 
     // Initialize tab renderer
     this.tabRenderer = new TabRenderer(
@@ -55,22 +64,26 @@ export class EditorManager {
       (id, newName) => this.renameTab(id, newName)
     );
 
-    // Initialize event handlers
-    this.eventHandlers = new EventHandlers({
-      onNewFile: () => this.createNewTab(),
-      onOpenFile: () => this.openFile(),
-      onSaveFile: () => this.saveFile(),
-      onRunCode: () => this.runCode(),
-      onShowRunnerModal: () => this.modalManager.showRunnerModal(),
-      onHideRunnerModal: () => this.modalManager.hideRunnerModal(),
-      onToggleInput: () => this.modalManager.toggleInputSection(),
-      onClearOutput: () => this.modalManager.clearOutput(),
-      onInsertTemplate: (type) => this.insertTemplate(type),
-      onCloseActiveTab: () => this.closeActiveTab(),
-      onSwitchNextTab: () => this.switchToNextTab(),
-      onHideCSharpWarning: () => this.modalManager.hideCSharpWarningModal(),
-      onRenameActiveTab: () => this.renameActiveTab(),
-    });
+    // Initialize event handlers (pass settingsManager for dropdown updates)
+    this.eventHandlers = new EventHandlers(
+      {
+        onNewFile: () => this.createNewTab(),
+        onOpenFile: () => this.openFile(),
+        onSaveFile: () => this.saveFile(),
+        onRunCode: () => this.runCode(),
+        onShowRunnerModal: () => this.modalManager.showRunnerModal(),
+        onHideRunnerModal: () => this.modalManager.hideRunnerModal(),
+        onToggleInput: () => this.modalManager.toggleInputSection(),
+        onClearOutput: () => this.modalManager.clearOutput(),
+        onInsertTemplate: (type) => this.insertTemplate(type),
+        onCloseActiveTab: () => this.closeActiveTab(),
+        onSwitchNextTab: () => this.switchToNextTab(),
+        onHideCSharpWarning: () => this.modalManager.hideCSharpWarningModal(),
+        onRenameActiveTab: () => this.renameActiveTab(),
+        onShowSettings: () => this.settingsModalManager.showSettingsModal(),
+      },
+      this.settingsManager
+    );
 
     // Initialize editor
     this.languageConf = new Compartment();
@@ -264,6 +277,7 @@ export class EditorManager {
   public renameActiveTab(): void {
     const activeTabId = this.tabManager.getActiveTabId();
     if (activeTabId !== null) {
+      // Prevent saving editor state when just renaming
       this.tabRenderer.startRenaming(activeTabId);
     }
   }
@@ -359,7 +373,7 @@ export class EditorManager {
   // Template Operations
   // ========================================================================
 
-  public insertTemplate(templateType: TemplateType): void {
+  public insertTemplate(templateType: string): void {
     const template = this.templateService.getTemplate(templateType);
     if (!template) return;
 
@@ -379,6 +393,12 @@ export class EditorManager {
       this.tabManager.markTabModified(activeTab.id);
       this.renderTabs();
     }
+  }
+
+  private handleTemplatesChanged(): void {
+    // Refresh the template dropdown
+    this.eventHandlers.refreshTemplateDropdown();
+    console.log("Templates updated and dropdown refreshed!");
   }
 
   // ========================================================================
