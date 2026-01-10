@@ -4,8 +4,8 @@ import { EditorState } from "@codemirror/state";
 import { EditorView, lineNumbers } from "@codemirror/view";
 import { defaultKeymap, history } from "@codemirror/commands";
 import { cpp } from "@codemirror/lang-cpp";
-import { oneDark } from "@codemirror/theme-one-dark";
 import { SettingsManager } from "../managers/SettingsManager";
+import { AVAILABLE_THEMES, getThemeExtension } from "../utils/themeUtils";
 
 export class SettingsModalManager {
   private settingsManager: SettingsManager;
@@ -13,13 +13,24 @@ export class SettingsModalManager {
   private currentEditingKey: string | null = null;
   private pendingChanges: Map<string, string> = new Map();
   private onTemplatesChanged: () => void;
+  private onThemeChanged: (theme: string) => void;
+  private currentActiveTab: "templates" | "appearance" = "templates";
 
   constructor(
     settingsManager: SettingsManager,
-    onTemplatesChanged: () => void
+    onTemplatesChanged: () => void,
+    onThemeChanged: (theme: string) => void
   ) {
     this.settingsManager = settingsManager;
     this.onTemplatesChanged = onTemplatesChanged;
+    this.onThemeChanged = onThemeChanged;
+
+    // Verify callbacks are set
+    console.log("SettingsModalManager initialized with callbacks:", {
+      hasTemplatesCallback: typeof this.onTemplatesChanged === "function",
+      hasThemeCallback: typeof this.onThemeChanged === "function",
+    });
+
     this.initializeEventHandlers();
   }
 
@@ -49,6 +60,20 @@ export class SettingsModalManager {
         this.hideSettingsModal();
       });
 
+    // Tab navigation
+    document
+      .getElementById("settings-tab-templates")
+      ?.addEventListener("click", () => {
+        this.switchTab("templates");
+      });
+
+    document
+      .getElementById("settings-tab-appearance")
+      ?.addEventListener("click", () => {
+        this.switchTab("appearance");
+      });
+
+    // Template controls
     document
       .getElementById("add-template-btn")
       ?.addEventListener("click", () => {
@@ -90,10 +115,40 @@ export class SettingsModalManager {
   showSettingsModal(): void {
     this.pendingChanges.clear();
     this.currentEditingKey = null;
+    this.currentActiveTab = "templates";
+    this.switchTab("templates");
     this.renderTemplateList();
+    this.setupThemeChangeHandler();
+    this.loadThemeSettings(); // Load theme settings AFTER setting up handler
 
     const modal = document.getElementById("settings-modal");
     modal?.classList.add("show");
+  }
+
+  private setupThemeChangeHandler(): void {
+    const themeSelect = document.getElementById(
+      "theme-select"
+    ) as HTMLSelectElement;
+    if (!themeSelect) {
+      console.error("theme-select element not found!");
+      return;
+    }
+
+    // Remove existing listener by cloning
+    const newSelect = themeSelect.cloneNode(true) as HTMLSelectElement;
+    themeSelect.parentNode?.replaceChild(newSelect, themeSelect);
+
+    // Add new listener - just preview the theme, don't save yet
+    newSelect.addEventListener("change", (e: Event) => {
+      const select = e.target as HTMLSelectElement;
+      console.log("Theme preview:", select.value);
+
+      if (typeof this.onThemeChanged === "function") {
+        this.onThemeChanged(select.value);
+      } else {
+        console.error("onThemeChanged is not a function!", this.onThemeChanged);
+      }
+    });
   }
 
   hideSettingsModal(): void {
@@ -104,6 +159,82 @@ export class SettingsModalManager {
       this.settingsEditor.destroy();
       this.settingsEditor = null;
     }
+
+    // Restore the saved theme if user cancelled
+    const savedTheme = this.settingsManager.getTheme();
+    const themeSelect = document.getElementById(
+      "theme-select"
+    ) as HTMLSelectElement;
+    if (themeSelect && themeSelect.value !== savedTheme) {
+      console.log("Restoring saved theme:", savedTheme);
+      this.onThemeChanged(savedTheme);
+    }
+  }
+
+  private switchTab(tab: "templates" | "appearance"): void {
+    this.currentActiveTab = tab;
+
+    // Update tab buttons
+    const templatesTab = document.getElementById("settings-tab-templates");
+    const appearanceTab = document.getElementById("settings-tab-appearance");
+    const templatesPanel = document.getElementById("templates-panel");
+    const appearancePanel = document.getElementById("appearance-panel");
+
+    if (tab === "templates") {
+      templatesTab?.classList.add("active");
+      appearanceTab?.classList.remove("active");
+      if (templatesPanel) templatesPanel.style.display = "grid";
+      if (appearancePanel) appearancePanel.style.display = "none";
+    } else {
+      templatesTab?.classList.remove("active");
+      appearanceTab?.classList.add("active");
+      if (templatesPanel) templatesPanel.style.display = "none";
+      if (appearancePanel) appearancePanel.style.display = "block";
+    }
+  }
+
+  private loadThemeSettings(): void {
+    const themeSelect = document.getElementById(
+      "theme-select"
+    ) as HTMLSelectElement;
+    if (!themeSelect) return;
+
+    // Clear existing options
+    themeSelect.innerHTML = "";
+
+    // Get current theme BEFORE rebuilding dropdown
+    const currentTheme = this.settingsManager.getTheme();
+
+    // Group themes by type
+    const darkThemes = AVAILABLE_THEMES.filter((t) => t.type === "dark");
+    const lightThemes = AVAILABLE_THEMES.filter((t) => t.type === "light");
+
+    // Add dark themes group
+    const darkGroup = document.createElement("optgroup");
+    darkGroup.label = "Dark Themes";
+    darkThemes.forEach((theme) => {
+      const option = document.createElement("option");
+      option.value = theme.id;
+      option.textContent = theme.name;
+      darkGroup.appendChild(option);
+    });
+    themeSelect.appendChild(darkGroup);
+
+    // Add light themes group
+    const lightGroup = document.createElement("optgroup");
+    lightGroup.label = "Light Themes";
+    lightThemes.forEach((theme) => {
+      const option = document.createElement("option");
+      option.value = theme.id;
+      option.textContent = theme.name;
+      lightGroup.appendChild(option);
+    });
+    themeSelect.appendChild(lightGroup);
+
+    // Set current theme AFTER options are added
+    themeSelect.value = currentTheme;
+
+    console.log("Theme settings loaded. Current theme:", currentTheme);
   }
 
   private renderTemplateList(): void {
@@ -170,6 +301,10 @@ export class SettingsModalManager {
     // Clear container
     container.innerHTML = "";
 
+    // Get current theme
+    const currentTheme = this.settingsManager.getTheme();
+    const themeExtension = getThemeExtension(currentTheme);
+
     // Create new editor
     const startState = EditorState.create({
       doc: content,
@@ -178,7 +313,7 @@ export class SettingsModalManager {
         EditorView.lineWrapping,
         history(),
         cpp(),
-        oneDark,
+        themeExtension,
         EditorState.tabSize.of(2),
       ],
     });
@@ -266,14 +401,22 @@ export class SettingsModalManager {
       this.pendingChanges.set(this.currentEditingKey, content);
     }
 
-    // Apply all pending changes
+    // Apply all pending template changes
     this.pendingChanges.forEach((code, key) => {
       this.settingsManager.updateTemplate(key, code);
     });
 
+    // Save theme
+    const themeSelect = document.getElementById(
+      "theme-select"
+    ) as HTMLSelectElement;
+    if (themeSelect) {
+      this.settingsManager.setTheme(themeSelect.value);
+    }
+
     this.hideSettingsModal();
     this.onTemplatesChanged();
-    console.log("Template settings saved!");
+    console.log("Settings saved!");
   }
 
   private showAddTemplateModal(): void {

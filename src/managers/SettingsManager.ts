@@ -8,23 +8,40 @@ interface CustomTemplate {
   code: string;
 }
 
+interface Settings {
+  customTemplates: Record<string, CustomTemplate>;
+  theme: string;
+}
+
 export class SettingsManager {
   private customTemplates: Map<string, CustomTemplate>;
+  private currentTheme: string;
   private storageKey = "notepad-sharp-settings";
 
   constructor() {
     this.customTemplates = new Map();
+    this.currentTheme = "oneDark"; // Default theme
     this.loadSettings();
+    console.log("SettingsManager initialized with theme:", this.currentTheme);
   }
 
   private loadSettings(): void {
     try {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
-        const data = JSON.parse(saved);
+        const data: Settings = JSON.parse(saved);
         if (data.customTemplates) {
           this.customTemplates = new Map(Object.entries(data.customTemplates));
         }
+        if (data.theme) {
+          this.currentTheme = data.theme;
+          console.log("Loaded saved theme:", this.currentTheme);
+        }
+      } else {
+        console.log(
+          "No saved settings found, using default theme:",
+          this.currentTheme
+        );
       }
     } catch (error) {
       console.error("Error loading settings:", error);
@@ -33,15 +50,30 @@ export class SettingsManager {
 
   private saveSettings(): void {
     try {
-      const data = {
+      const data: Settings = {
         customTemplates: Object.fromEntries(this.customTemplates),
+        theme: this.currentTheme,
       };
       localStorage.setItem(this.storageKey, JSON.stringify(data));
+      console.log("Settings saved. Theme:", this.currentTheme);
     } catch (error) {
       console.error("Error saving settings:", error);
     }
   }
 
+  // Theme Methods
+  getTheme(): string {
+    console.log("getTheme called, returning:", this.currentTheme);
+    return this.currentTheme;
+  }
+
+  setTheme(theme: string): void {
+    console.log("setTheme called with:", theme);
+    this.currentTheme = theme;
+    this.saveSettings();
+  }
+
+  // Template Methods
   getTemplate(key: string): string {
     // Check custom templates first
     const custom = this.customTemplates.get(key);

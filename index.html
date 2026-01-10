@@ -94,37 +94,46 @@
     <div id="settings-modal" class="modal">
       <div class="modal-content settings-modal-content">
         <div class="modal-header">
-          <h3>Template Settings</h3>
+          <h3>Settings</h3>
           <button id="settings-close" class="close-btn">&times;</button>
         </div>
 
-        <div class="modal-body settings-body">
-          <!-- Template List Sidebar -->
+        <!-- Settings Tabs -->
+        <div class="settings-tabs">
+          <button id="settings-tab-templates" class="settings-tab active">
+            Templates
+          </button>
+          <button id="settings-tab-appearance" class="settings-tab">
+            Appearance
+          </button>
+        </div>
+
+        <!-- Templates Panel -->
+        <div id="templates-panel" class="settings-body">
           <div class="settings-sidebar">
             <div class="settings-section-header">
               <h4>Templates</h4>
               <button
                 id="add-template-btn"
                 class="icon-btn"
-                title="Add New Template"
+                title="Add Template"
               >
                 +
               </button>
             </div>
             <div id="template-list" class="template-list">
-              <!-- Templates will be dynamically inserted here -->
+              <!-- Template list items will be rendered here -->
             </div>
           </div>
 
-          <!-- Template Editor -->
           <div class="settings-editor">
-            <div id="template-editor-header" class="template-editor-header">
+            <div class="template-editor-header">
               <input
-                id="template-name-input"
                 type="text"
+                id="template-name-input"
                 class="template-name-edit"
-                placeholder="Template Name"
                 readonly
+                placeholder="Template Name"
               />
               <div class="template-actions">
                 <button
@@ -132,7 +141,7 @@
                   class="secondary-btn small-btn"
                   style="display: none"
                 >
-                  Reset to Default
+                  Reset
                 </button>
                 <button
                   id="delete-template-btn"
@@ -143,23 +152,94 @@
                 </button>
               </div>
             </div>
-
             <div
               id="template-editor-container"
               class="template-editor-container"
             >
-              <div class="template-placeholder">
-                Select a template to edit or create a new one
+              <div class="template-placeholder">Select a template to edit</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appearance Panel -->
+        <div
+          id="appearance-panel"
+          class="appearance-panel"
+          style="display: none"
+        >
+          <div class="appearance-content">
+            <div class="settings-section">
+              <h4 class="section-title">Editor Theme</h4>
+              <p class="section-description">
+                Choose a color theme for the code editor
+              </p>
+              <div class="form-group">
+                <label for="theme-select">Theme</label>
+                <select id="theme-select" class="form-select">
+                  <!-- Theme options will be populated by JavaScript -->
+                </select>
               </div>
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
+          <button id="cancel-settings-btn" class="secondary-btn">Cancel</button>
           <button id="save-settings-btn" class="primary-btn">
             Save Changes
           </button>
-          <button id="cancel-settings-btn" class="secondary-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Template Modal -->
+    <div id="add-template-modal" class="modal">
+      <div class="modal-content small-modal-content">
+        <div class="modal-header">
+          <h3>Add Custom Template</h3>
+          <button id="add-template-close" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="new-template-key">Template Key</label>
+            <input
+              type="text"
+              id="new-template-key"
+              class="form-input"
+              placeholder="e.g., my-template"
+            />
+            <span class="form-hint"
+              >Lowercase letters, numbers, and hyphens only</span
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="new-template-name">Template Name</label>
+            <input
+              type="text"
+              id="new-template-name"
+              class="form-input"
+              placeholder="e.g., My Custom Template"
+            />
+          </div>
+
+          <div
+            id="add-template-error"
+            class="error-message"
+            style="display: none"
+          >
+            <!-- Error message will be displayed here -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="cancel-add-template-btn" class="secondary-btn">
+            Cancel
+          </button>
+          <button id="confirm-add-template-btn" class="primary-btn">
+            Add Template
+          </button>
         </div>
       </div>
     </div>

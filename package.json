@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@babel/runtime": "^7.28.4",
     "@codemirror/basic-setup": "^0.20.0",
     "@codemirror/commands": "^6.10.1",
     "@codemirror/lang-cpp": "^6.0.3",
@@ -25,6 +26,15 @@
     "@tauri-apps/plugin-fs": "^2.4.4",
     "@tauri-apps/plugin-http": "^2.5.4",
     "@tauri-apps/plugin-opener": "^2",
+    "@uiw/codemirror-themes-all": "^4.25.4",
+    "cm6-theme-basic-dark": "^0.2.0",
+    "cm6-theme-basic-light": "^0.2.0",
+    "cm6-theme-gruvbox-dark": "^0.2.0",
+    "cm6-theme-gruvbox-light": "^0.2.0",
+    "cm6-theme-material-dark": "^0.2.0",
+    "cm6-theme-nord": "^0.2.0",
+    "cm6-theme-solarized-dark": "^0.2.0",
+    "cm6-theme-solarized-light": "^0.2.0",
     "dotenv": "^17.2.3"
   },
   "devDependencies": {

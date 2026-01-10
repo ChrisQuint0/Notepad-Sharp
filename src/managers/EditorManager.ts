@@ -9,7 +9,6 @@ import {
   redo,
   indentWithTab,
 } from "@codemirror/commands";
-import { oneDark } from "@codemirror/theme-one-dark";
 import { Compartment } from "@codemirror/state";
 
 import { TabManager } from "./TabManager";
@@ -26,6 +25,7 @@ import { EDITOR_CONFIG } from "../constants";
 import type { TemplateType } from "../types";
 import { getLanguageExtension, getLanguageId } from "../utils/languageDetector";
 import { expectsInput, extractFileName } from "../utils/helpers";
+import { getThemeExtension } from "../utils/themeUtils";
 import { bracketMatching } from "@codemirror/language";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import { foldGutter, foldKeymap } from "@codemirror/language";
@@ -43,6 +43,7 @@ export class EditorManager {
 
   private editorView: EditorView;
   private languageConf: Compartment;
+  private themeConf: Compartment;
 
   constructor() {
     // Initialize services and managers
@@ -54,7 +55,8 @@ export class EditorManager {
     this.modalManager = new ModalManager();
     this.settingsModalManager = new SettingsModalManager(
       this.settingsManager,
-      () => this.handleTemplatesChanged()
+      () => this.handleTemplatesChanged(),
+      (theme) => this.handleThemeChanged(theme)
     );
 
     // Initialize tab renderer
@@ -87,6 +89,7 @@ export class EditorManager {
 
     // Initialize editor
     this.languageConf = new Compartment();
+    this.themeConf = new Compartment();
     this.editorView = this.createEditor();
 
     // Initialize UI
@@ -105,6 +108,10 @@ export class EditorManager {
   // ========================================================================
 
   private createEditor(): EditorView {
+    // Get the current theme from settings
+    const currentTheme = this.settingsManager.getTheme();
+    const themeExtension = getThemeExtension(currentTheme);
+
     const startState = EditorState.create({
       doc: "",
       extensions: [
@@ -122,7 +129,7 @@ export class EditorManager {
         bracketMatching(),
         indentationMarkers(),
         this.languageConf.of([]),
-        oneDark,
+        this.themeConf.of(themeExtension),
         EditorState.tabSize.of(EDITOR_CONFIG.tabSize),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
@@ -399,6 +406,21 @@ export class EditorManager {
     // Refresh the template dropdown
     this.eventHandlers.refreshTemplateDropdown();
     console.log("Templates updated and dropdown refreshed!");
+  }
+
+  private handleThemeChanged(theme: string): void {
+    console.log("Theme changed to:", theme);
+
+    // Save the theme
+    this.settingsManager.setTheme(theme);
+
+    // Update the editor theme
+    const themeExtension = getThemeExtension(theme);
+    this.editorView.dispatch({
+      effects: this.themeConf.reconfigure(themeExtension),
+    });
+
+    console.log("Editor theme updated!");
   }
 
   // ========================================================================
