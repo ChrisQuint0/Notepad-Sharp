@@ -7,6 +7,8 @@ export interface Tab {
   content: string;
   savedContent: string;
   modified: boolean;
+  cursorPosition?: number;
+  scrollTop?: number;
 }
 
 export type TemplateType = "csharp" | "cpp" | "python" | "java";

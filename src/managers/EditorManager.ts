@@ -135,6 +135,48 @@ export class EditorManager {
   }
 
   // ========================================================================
+  // Editor State Save/Restore
+  // ========================================================================
+
+  private saveEditorState(): void {
+    const activeTab = this.tabManager.getActiveTab();
+    if (!activeTab) return;
+
+    const cursorPosition = this.editorView.state.selection.main.head;
+    const scrollTop = this.editorView.scrollDOM.scrollTop;
+
+    this.tabManager.updateTabEditorState(
+      activeTab.id,
+      cursorPosition,
+      scrollTop
+    );
+  }
+
+  private restoreEditorState(tabId: number): void {
+    const tab = this.tabManager.findTabById(tabId);
+    if (!tab) return;
+
+    // Restore cursor position
+    if (tab.cursorPosition !== undefined) {
+      const pos = Math.min(
+        tab.cursorPosition,
+        this.editorView.state.doc.length
+      );
+      this.editorView.dispatch({
+        selection: { anchor: pos },
+        scrollIntoView: true,
+      });
+    }
+
+    // Restore scroll position (with a small delay to ensure DOM is ready)
+    if (tab.scrollTop !== undefined) {
+      requestAnimationFrame(() => {
+        this.editorView.scrollDOM.scrollTop = tab.scrollTop || 0;
+      });
+    }
+  }
+
+  // ========================================================================
   // Tab Operations
   // ========================================================================
 
@@ -143,14 +185,23 @@ export class EditorManager {
     path: string | null = null,
     content: string = ""
   ): void {
+    // Save current tab state before creating new tab
+    this.saveEditorState();
+
     const tab = this.tabManager.createTab(name, path, content);
     this.updateEditorContent(tab.content);
     this.updateLanguage(tab.path);
     this.renderTabs();
     this.updateTitle(tab.name);
+
+    // New tabs start at position 0
+    this.restoreEditorState(tab.id);
   }
 
   public switchToTab(tabId: number): void {
+    // Save current tab state before switching
+    this.saveEditorState();
+
     if (!this.tabManager.switchToTab(tabId)) return;
 
     const tab = this.tabManager.getActiveTab();
@@ -160,6 +211,9 @@ export class EditorManager {
     this.updateLanguage(tab.path);
     this.renderTabs();
     this.updateTitle(tab.name);
+
+    // Restore the saved state for this tab
+    this.restoreEditorState(tabId);
   }
 
   public async closeTab(tabId: number): Promise<void> {
@@ -177,6 +231,7 @@ export class EditorManager {
           this.updateEditorContent(newActiveTab.content);
           this.updateLanguage(newActiveTab.path);
           this.updateTitle(newActiveTab.name);
+          this.restoreEditorState(newActiveTab.id);
         }
       }
     }
@@ -192,6 +247,9 @@ export class EditorManager {
   }
 
   public switchToNextTab(): void {
+    // Save current tab state before switching
+    this.saveEditorState();
+
     this.tabManager.switchToNextTab();
     const activeTab = this.tabManager.getActiveTab();
     if (activeTab) {
@@ -199,6 +257,7 @@ export class EditorManager {
       this.updateLanguage(activeTab.path);
       this.renderTabs();
       this.updateTitle(activeTab.name);
+      this.restoreEditorState(activeTab.id);
     }
   }
 

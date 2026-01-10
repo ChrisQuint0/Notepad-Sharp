@@ -102,6 +102,18 @@ export class TabManager {
     }
   }
 
+  updateTabEditorState(
+    tabId: number,
+    cursorPosition: number,
+    scrollTop: number
+  ): void {
+    const tab = this.findTabById(tabId);
+    if (tab) {
+      tab.cursorPosition = cursorPosition;
+      tab.scrollTop = scrollTop;
+    }
+  }
+
   markTabSaved(tabId: number, content: string): void {
     const tab = this.findTabById(tabId);
     if (tab) {
