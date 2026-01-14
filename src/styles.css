@@ -86,7 +86,7 @@ body {
 
 .cm-editor {
   height: 100%;
-  font-size: 14px;
+  font-size: inherit;
 }
 
 .cm-scroller {

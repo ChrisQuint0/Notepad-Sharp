@@ -17,6 +17,8 @@ interface EventCallbacks {
   onHideCSharpWarning: () => void;
   onRenameActiveTab: () => void;
   onShowSettings: () => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
 }
 
 export class EventHandlers {
@@ -88,22 +90,32 @@ export class EventHandlers {
   }
 
   private setupDropdownHandlers(): void {
+    // Templates dropdown
     document.getElementById("btn-templates")?.addEventListener("click", (e) => {
       e.stopPropagation();
-
-      // Regenerate dropdown content with current templates
       this.updateTemplateDropdown();
+      document
+        .querySelector(".dropdown-content.templates")
+        ?.classList.toggle("show");
+    });
 
-      document.querySelector(".dropdown-content")?.classList.toggle("show");
+    // View dropdown
+    document.getElementById("btn-view")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document
+        .querySelector(".dropdown-content.view")
+        ?.classList.toggle("show");
     });
 
     document.addEventListener("click", () => {
-      document.querySelector(".dropdown-content")?.classList.remove("show");
+      document.querySelectorAll(".dropdown-content").forEach((dropdown) => {
+        dropdown.classList.remove("show");
+      });
     });
 
-    // Delegate event handling for dropdown items
+    // Delegate event handling for template dropdown items
     document
-      .querySelector(".dropdown-content")
+      .querySelector(".dropdown-content.templates")
       ?.addEventListener("click", (e) => {
         const target = e.target as HTMLElement;
         const item = target.closest(".dropdown-item") as HTMLElement;
@@ -114,10 +126,21 @@ export class EventHandlers {
           }
         }
       });
+
+    // View dropdown items
+    document.getElementById("zoom-in-item")?.addEventListener("click", () => {
+      this.callbacks.onZoomIn();
+    });
+
+    document.getElementById("zoom-out-item")?.addEventListener("click", () => {
+      this.callbacks.onZoomOut();
+    });
   }
 
   private updateTemplateDropdown(): void {
-    const dropdownContent = document.querySelector(".dropdown-content");
+    const dropdownContent = document.querySelector(
+      ".dropdown-content.templates"
+    );
     if (!dropdownContent) return;
 
     // Clear existing items
@@ -193,6 +216,19 @@ export class EventHandlers {
       // Ctrl shortcuts
       if (!e.ctrlKey) return;
 
+      // Zoom shortcuts
+      if (e.key === "=" || e.key === "+") {
+        e.preventDefault();
+        this.callbacks.onZoomIn();
+        return;
+      }
+
+      if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        this.callbacks.onZoomOut();
+        return;
+      }
+
       const shortcuts: Record<string, () => void> = {
         "3": () => this.callbacks.onInsertTemplate("csharp"),
         "4": () => this.callbacks.onInsertTemplate("cpp"),
@@ -203,7 +239,7 @@ export class EventHandlers {
         n: () => this.callbacks.onNewFile(),
         w: () => this.callbacks.onCloseActiveTab(),
         Tab: () => this.callbacks.onSwitchNextTab(),
-        ",": () => this.callbacks.onShowSettings(), // Ctrl+, for settings
+        ",": () => this.callbacks.onShowSettings(),
       };
 
       const handler = shortcuts[e.key];

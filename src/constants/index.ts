@@ -77,3 +77,12 @@ export const LANGUAGE_IDS: Record<string, string> = {
   java: "java",
   js: "javascript",
 };
+
+// Zoom configuration
+export const ZOOM_CONFIG = {
+  min: 50,
+  max: 300,
+  default: 100,
+  step: 10,
+  baseFontSize: 14,
+};

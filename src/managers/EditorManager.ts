@@ -21,7 +21,7 @@ import { ModalManager } from "../ui/ModalManager";
 import { SettingsModalManager } from "../ui/SettingsModalManager";
 import { EventHandlers } from "../ui/EventHandlers";
 
-import { EDITOR_CONFIG } from "../constants";
+import { EDITOR_CONFIG, ZOOM_CONFIG } from "../constants";
 import { getLanguageExtension, getLanguageId } from "../utils/languageDetector";
 import { expectsInput, extractFileName } from "../utils/helpers";
 import { getThemeExtension } from "../utils/themeUtils";
@@ -43,6 +43,7 @@ export class EditorManager {
   private editorView: EditorView;
   private languageConf: Compartment;
   private themeConf: Compartment;
+  private currentZoom: number = ZOOM_CONFIG.default;
 
   constructor() {
     // Initialize services and managers
@@ -82,6 +83,8 @@ export class EditorManager {
         onHideCSharpWarning: () => this.modalManager.hideCSharpWarningModal(),
         onRenameActiveTab: () => this.renameActiveTab(),
         onShowSettings: () => this.settingsModalManager.showSettingsModal(),
+        onZoomIn: () => this.zoomIn(),
+        onZoomOut: () => this.zoomOut(),
       },
       this.settingsManager
     );
@@ -100,6 +103,9 @@ export class EditorManager {
       null,
       EDITOR_CONFIG.welcomeMessage
     );
+
+    // Load saved zoom level
+    this.loadZoomLevel();
   }
 
   // ========================================================================
@@ -192,6 +198,59 @@ export class EditorManager {
       requestAnimationFrame(() => {
         this.editorView.scrollDOM.scrollTop = tab.scrollTop || 0;
       });
+    }
+  }
+
+  // ========================================================================
+  // Zoom Operations
+  // ========================================================================
+
+  public zoomIn(): void {
+    const newZoom = Math.min(
+      this.currentZoom + ZOOM_CONFIG.step,
+      ZOOM_CONFIG.max
+    );
+    this.setZoom(newZoom);
+  }
+
+  public zoomOut(): void {
+    const newZoom = Math.max(
+      this.currentZoom - ZOOM_CONFIG.step,
+      ZOOM_CONFIG.min
+    );
+    this.setZoom(newZoom);
+  }
+
+  private setZoom(zoomLevel: number): void {
+    this.currentZoom = zoomLevel;
+    const container = document.getElementById("editor-container");
+    if (container) {
+      const fontSize = (zoomLevel / 100) * ZOOM_CONFIG.baseFontSize;
+      container.style.fontSize = `${fontSize}px`;
+    }
+    this.saveZoomLevel();
+    console.log(`Zoom set to ${zoomLevel}% (${(zoomLevel / 100) * ZOOM_CONFIG.baseFontSize}px)`);
+  }
+
+  private saveZoomLevel(): void {
+    try {
+      localStorage.setItem("notepad-sharp-zoom", this.currentZoom.toString());
+    } catch (error) {
+      console.error("Error saving zoom level:", error);
+    }
+  }
+
+  private loadZoomLevel(): void {
+    try {
+      const saved = localStorage.getItem("notepad-sharp-zoom");
+      if (saved) {
+        const zoomLevel = parseInt(saved, 10);
+        if (zoomLevel >= ZOOM_CONFIG.min && zoomLevel <= ZOOM_CONFIG.max) {
+          this.setZoom(zoomLevel);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading zoom level:", error);
     }
   }
 
@@ -322,8 +381,7 @@ export class EditorManager {
     } catch (error) {
       console.error("Error renaming file:", error);
       console.error(
-        `Failed to rename file: ${
-          error instanceof Error ? error.message : "Unknown error"
+        `Failed to rename file: ${error instanceof Error ? error.message : "Unknown error"
         }`
       );
       // Re-render to restore original name
@@ -476,8 +534,7 @@ export class EditorManager {
     } catch (error) {
       console.error("Code execution error:", error);
       this.modalManager.displayOutput(
-        `Error: ${
-          error instanceof Error ? error.message : "Failed to execute code"
+        `Error: ${error instanceof Error ? error.message : "Failed to execute code"
         }`,
         "error"
       );
