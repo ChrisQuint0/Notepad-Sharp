@@ -377,13 +377,12 @@ export class EditorManager {
         this.updateTitle(newName);
       }
 
+      this.modalManager.displayOutput(`File renamed to ${newName} successfully!`, "success");
       console.log("File renamed successfully!");
     } catch (error) {
       console.error("Error renaming file:", error);
-      console.error(
-        `Failed to rename file: ${error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      this.modalManager.displayOutput(`Failed to rename file: ${errorMessage}`, "error");
       // Re-render to restore original name
       this.renderTabs();
     }
@@ -427,9 +426,12 @@ export class EditorManager {
       this.renderTabs();
       this.updateTitle(activeTab.name);
 
+      this.modalManager.displayOutput(`File "${activeTab.name}" saved successfully!`, "success");
       console.log("File saved successfully!");
     } catch (error) {
       console.error("Error saving file:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      this.modalManager.displayOutput(`Error saving file: ${errorMessage}`, "error");
     }
   }
 

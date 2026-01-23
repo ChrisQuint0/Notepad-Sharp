@@ -8,6 +8,7 @@ export const FILE_FILTERS: FileFilter[] = [
   { name: "C++ Files", extensions: ["cpp", "c", "h"] },
   { name: "Python Files", extensions: ["py"] },
   { name: "Java Files", extensions: ["java"] },
+  { name: "XML Files", extensions: ["xml"] },
   { name: "Text Files", extensions: ["txt", "md"] },
 ];
 
@@ -76,6 +77,7 @@ export const LANGUAGE_IDS: Record<string, string> = {
   py: "python",
   java: "java",
   js: "javascript",
+  xml: "xml",
 };
 
 // Zoom configuration

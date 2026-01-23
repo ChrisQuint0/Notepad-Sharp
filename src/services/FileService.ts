@@ -56,8 +56,9 @@ export class FileService {
   }
 
   getNewPath(oldPath: string, newFileName: string): string {
+    const separator = oldPath.includes("\\") ? "\\" : "/";
     const pathParts = oldPath.split(/[/\\]/);
     pathParts[pathParts.length - 1] = newFileName;
-    return pathParts.join(oldPath.includes("\\") ? "\\" : "/");
+    return pathParts.join(separator);
   }
 }

@@ -2,6 +2,7 @@
 
 import { cpp } from "@codemirror/lang-cpp";
 import { java } from "@codemirror/lang-java";
+import { xml } from "@codemirror/lang-xml";
 import { LANGUAGE_IDS } from "../constants";
 
 export function getLanguageId(filePath: string | null): string {
@@ -27,6 +28,8 @@ export function getLanguageExtension(filePath: string | null) {
       return [cpp()];
     case "java":
       return [java()];
+    case "xml":
+      return [xml()];
     default:
       return [];
   }
