@@ -64,6 +64,7 @@ export class EditorManager {
       onCloseActiveTab: () => this.closeActiveTab(),
       onSwitchNextTab: () => this.switchToNextTab(),
       onRenameActiveTab: () => this.renameActiveTab(),
+      onInsertCSharpTemplate: () => this.insertCSharpTemplate(),
       onToggleTheme: () => this.toggleTheme(),
       onZoomIn: () => this.zoomIn(),
       onZoomOut: () => this.zoomOut(),
@@ -516,5 +517,39 @@ export class EditorManager {
     if (!btn) return;
     // use moon for dark theme, sun for light theme
     btn.textContent = themeId === "dracula" ? "☾" : "☀";
+  }
+
+  // Insert a C# template at the current cursor position (or replace selection).
+  private insertCSharpTemplate(): void {
+    const tpl = [
+      "using System;",
+      "using System.Linq;",
+      "using System.Collections.Generic;",
+      "using System.Text;",
+      "",
+      "class Program {",
+      "  static void Main(){",
+      "    ",
+      "  }",
+      "}",
+      "",
+    ].join("\n");
+
+    const state = this.editorView.state;
+    const sel = state.selection.main;
+    const from = sel.from;
+    const to = sel.to;
+
+    // Compute caret offset inside the inserted template: place after the indented blank line
+    const innerIndex = tpl.indexOf("\n  \n");
+    const caretOffsetInTpl = innerIndex >= 0 ? innerIndex + 3 : tpl.length;
+
+    const insertPos = from;
+
+    this.editorView.dispatch({
+      changes: { from: from, to: to, insert: tpl },
+      selection: { anchor: insertPos + caretOffsetInTpl },
+      scrollIntoView: true,
+    });
   }
 }

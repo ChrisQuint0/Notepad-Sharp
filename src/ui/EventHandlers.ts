@@ -6,6 +6,7 @@ interface EventCallbacks {
   onCloseActiveTab: () => void;
   onSwitchNextTab: () => void;
   onRenameActiveTab: () => void;
+  onInsertCSharpTemplate: () => void;
   onToggleTheme: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
@@ -126,6 +127,7 @@ export class EventHandlers {
         w: () => this.callbacks.onCloseActiveTab(),
         Tab: () => this.callbacks.onSwitchNextTab(),
         ",": () => this.callbacks.onToggleTheme(),
+        d: () => this.callbacks.onInsertCSharpTemplate(),
       };
 
       const handler = shortcuts[e.key];
