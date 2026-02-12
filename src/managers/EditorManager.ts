@@ -83,12 +83,41 @@ export class EditorManager {
     this.updateThemeToggleButton(currentTheme);
     this.applyThemeClass(currentTheme);
 
-    // Create initial tab
-    this.createNewTab(
-      EDITOR_CONFIG.defaultFileName,
-      null,
-      EDITOR_CONFIG.welcomeMessage,
-    );
+    // Restore previously open tabs if any, otherwise create initial tab
+    try {
+      const { tabs: savedTabs, activeIndex } =
+        this.settingsManager.getOpenTabs();
+      if (savedTabs && savedTabs.length > 0) {
+        this.tabManager.loadTabs(savedTabs, activeIndex);
+        const active = this.tabManager.getActiveTab();
+        if (active) {
+          this.updateEditorContent(active.content);
+          this.updateLanguage(active.path);
+          this.renderTabs();
+          this.updateTitle(active.name);
+          this.restoreEditorState(active.id);
+        }
+      } else {
+        this.createNewTab(
+          EDITOR_CONFIG.defaultFileName,
+          null,
+          EDITOR_CONFIG.welcomeMessage,
+        );
+      }
+    } catch (err) {
+      console.error("Error restoring open tabs:", err);
+      this.createNewTab(
+        EDITOR_CONFIG.defaultFileName,
+        null,
+        EDITOR_CONFIG.welcomeMessage,
+      );
+    }
+
+    // Save tabs when the window is closed/reloaded
+    window.addEventListener("beforeunload", () => {
+      this.saveEditorState();
+      this.saveOpenTabs();
+    });
 
     // Load saved zoom level
     this.loadZoomLevel();
@@ -143,6 +172,7 @@ export class EditorManager {
     const currentContent = this.editorView.state.doc.toString();
     this.tabManager.updateTabContent(activeTab.id, currentContent);
     this.renderTabs();
+    this.saveOpenTabs();
   }
 
   // ========================================================================
@@ -161,6 +191,33 @@ export class EditorManager {
       cursorPosition,
       scrollTop,
     );
+  }
+
+  private saveOpenTabs(): void {
+    try {
+      const tabs = this.tabManager.getAllTabs();
+      const persisted = tabs.map((t) => ({
+        name: t.name,
+        path: t.path,
+        content: t.content,
+        savedContent: t.savedContent,
+        modified: t.modified,
+        cursorPosition: t.cursorPosition,
+        scrollTop: t.scrollTop,
+      }));
+
+      const activeId = this.tabManager.getActiveTabId();
+      const activeIndex = activeId
+        ? tabs.findIndex((t) => t.id === activeId)
+        : null;
+
+      this.settingsManager.setOpenTabs(
+        persisted,
+        activeIndex === -1 ? null : activeIndex,
+      );
+    } catch (err) {
+      console.error("Error saving open tabs:", err);
+    }
   }
 
   private restoreEditorState(tabId: number): void {
@@ -262,6 +319,7 @@ export class EditorManager {
 
     // New tabs start at position 0
     this.restoreEditorState(tab.id);
+    this.saveOpenTabs();
   }
 
   public switchToTab(tabId: number): void {
@@ -280,6 +338,7 @@ export class EditorManager {
 
     // Restore the saved state for this tab
     this.restoreEditorState(tabId);
+    this.saveOpenTabs();
   }
 
   public async closeTab(tabId: number): Promise<void> {
@@ -303,6 +362,7 @@ export class EditorManager {
     }
 
     this.renderTabs();
+    this.saveOpenTabs();
   }
 
   public closeActiveTab(): void {
@@ -324,6 +384,7 @@ export class EditorManager {
       this.renderTabs();
       this.updateTitle(activeTab.name);
       this.restoreEditorState(activeTab.id);
+      this.saveOpenTabs();
     }
   }
 
@@ -336,6 +397,7 @@ export class EditorManager {
 
     // Re-render tabs to reflect new order
     this.renderTabs();
+    this.saveOpenTabs();
   }
 
   public renameActiveTab(): void {
@@ -381,6 +443,7 @@ export class EditorManager {
         "success",
       );
       console.log("File renamed successfully!");
+      this.saveOpenTabs();
     } catch (error) {
       console.error("Error renaming file:", error);
       const errorMessage =
@@ -431,6 +494,8 @@ export class EditorManager {
       this.updateLanguage(filePath);
       this.renderTabs();
       this.updateTitle(activeTab.name);
+
+      this.saveOpenTabs();
 
       this.modalManager.displayOutput(
         `File "${activeTab.name}" saved successfully!`,

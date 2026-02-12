@@ -167,6 +167,45 @@ export class TabManager {
     return true;
   }
 
+  // Load tabs from a persisted representation (used for restoring on startup)
+  loadTabs(
+    persistedTabs: Array<{
+      name: string;
+      path: string | null;
+      content: string;
+      savedContent: string;
+      modified: boolean;
+      cursorPosition?: number;
+      scrollTop?: number;
+    }>,
+    activeIndex: number | null = null,
+  ): void {
+    this.tabs = [];
+    this.nextTabId = 1;
+
+    persistedTabs.forEach((p, idx) => {
+      const tab: Tab = {
+        id: this.nextTabId++,
+        name: p.name,
+        path: p.path,
+        content: p.content,
+        savedContent: p.savedContent,
+        modified: !!p.modified,
+        cursorPosition: p.cursorPosition,
+        scrollTop: p.scrollTop,
+      };
+      this.tabs.push(tab);
+
+      if (activeIndex !== null && idx === activeIndex) {
+        this.activeTabId = tab.id;
+      }
+    });
+
+    if (this.tabs.length > 0 && this.activeTabId === null) {
+      this.activeTabId = this.tabs[0].id;
+    }
+  }
+
   private async confirmClose(tabName: string): Promise<boolean> {
     return await tauriConfirm(
       `Your changes will be lost if you don't save them.`,

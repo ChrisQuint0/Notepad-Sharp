@@ -8,14 +8,28 @@ interface CustomTemplate {
   code: string;
 }
 
+interface PersistedTab {
+  name: string;
+  path: string | null;
+  content: string;
+  savedContent: string;
+  modified: boolean;
+  cursorPosition?: number;
+  scrollTop?: number;
+}
+
 interface Settings {
   customTemplates: Record<string, CustomTemplate>;
   theme: string;
+  openTabs?: PersistedTab[];
+  activeTabIndex?: number | null;
 }
 
 export class SettingsManager {
   private customTemplates: Map<string, CustomTemplate>;
   private currentTheme: string;
+  private openTabs: PersistedTab[] = [];
+  private activeTabIndex: number | null = null;
   private storageKey = "notepad-sharp-settings";
 
   constructor() {
@@ -37,6 +51,11 @@ export class SettingsManager {
           this.currentTheme = data.theme;
           console.log("Loaded saved theme:", this.currentTheme);
         }
+        if (data.openTabs) {
+          this.openTabs = data.openTabs;
+          this.activeTabIndex = data.activeTabIndex ?? null;
+          console.log("Loaded saved open tabs:", this.openTabs.length);
+        }
       } else {
         console.log(
           "No saved settings found, using default theme:",
@@ -53,12 +72,25 @@ export class SettingsManager {
       const data: Settings = {
         customTemplates: Object.fromEntries(this.customTemplates),
         theme: this.currentTheme,
+        openTabs: this.openTabs.length > 0 ? this.openTabs : undefined,
+        activeTabIndex: this.activeTabIndex,
       };
       localStorage.setItem(this.storageKey, JSON.stringify(data));
       console.log("Settings saved. Theme:", this.currentTheme);
     } catch (error) {
       console.error("Error saving settings:", error);
     }
+  }
+
+  // Open tabs persistence
+  getOpenTabs(): { tabs: PersistedTab[]; activeIndex: number | null } {
+    return { tabs: [...this.openTabs], activeIndex: this.activeTabIndex };
+  }
+
+  setOpenTabs(tabs: PersistedTab[], activeIndex: number | null): void {
+    this.openTabs = tabs.map((t) => ({ ...t }));
+    this.activeTabIndex = activeIndex;
+    this.saveSettings();
   }
 
   // Theme Methods
