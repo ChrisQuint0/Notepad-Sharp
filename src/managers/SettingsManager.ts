@@ -20,7 +20,7 @@ export class SettingsManager {
 
   constructor() {
     this.customTemplates = new Map();
-    this.currentTheme = "oneDark"; // Default theme
+    this.currentTheme = "dracula"; // Default theme is now Dracula (dark)
     this.loadSettings();
     console.log("SettingsManager initialized with theme:", this.currentTheme);
   }
@@ -40,7 +40,7 @@ export class SettingsManager {
       } else {
         console.log(
           "No saved settings found, using default theme:",
-          this.currentTheme
+          this.currentTheme,
         );
       }
     } catch (error) {

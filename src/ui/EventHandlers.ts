@@ -9,7 +9,7 @@ interface EventCallbacks {
   onCloseActiveTab: () => void;
   onSwitchNextTab: () => void;
   onRenameActiveTab: () => void;
-  onShowSettings: () => void;
+  onToggleTheme: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
 }
@@ -31,10 +31,10 @@ export class EventHandlers {
   }
 
   private setupButtonHandlers(): void {
-    // File actions are in a dropdown now; Settings remains a direct button
+    // File actions are in a dropdown now; Theme toggle is on the right
     document
-      .getElementById("btn-settings")
-      ?.addEventListener("click", () => this.callbacks.onShowSettings());
+      .getElementById("btn-theme-toggle")
+      ?.addEventListener("click", () => this.callbacks.onToggleTheme());
   }
 
   private setupModalHandlers(): void {
@@ -130,7 +130,7 @@ export class EventHandlers {
         n: () => this.callbacks.onNewFile(),
         w: () => this.callbacks.onCloseActiveTab(),
         Tab: () => this.callbacks.onSwitchNextTab(),
-        ",": () => this.callbacks.onShowSettings(),
+        ",": () => this.callbacks.onToggleTheme(),
       };
 
       const handler = shortcuts[e.key];

@@ -16,7 +16,6 @@ import { SettingsManager } from "./SettingsManager";
 import { FileService } from "../services/FileService";
 import { TabRenderer } from "../ui/TabRenderer";
 import { ModalManager } from "../ui/ModalManager";
-import { SettingsModalManager } from "../ui/SettingsModalManager";
 import { EventHandlers } from "../ui/EventHandlers";
 
 import { EDITOR_CONFIG, ZOOM_CONFIG } from "../constants";
@@ -33,7 +32,6 @@ export class EditorManager {
   private fileService: FileService;
   private tabRenderer: TabRenderer;
   private modalManager: ModalManager;
-  private settingsModalManager: SettingsModalManager;
   private eventHandlers: EventHandlers;
 
   private editorView: EditorView;
@@ -47,10 +45,6 @@ export class EditorManager {
     this.settingsManager = new SettingsManager();
     this.fileService = new FileService();
     this.modalManager = new ModalManager();
-    this.settingsModalManager = new SettingsModalManager(
-      this.settingsManager,
-      (theme) => this.handleThemeChanged(theme),
-    );
 
     // Initialize tab renderer
     this.tabRenderer = new TabRenderer(
@@ -70,7 +64,7 @@ export class EditorManager {
         onCloseActiveTab: () => this.closeActiveTab(),
         onSwitchNextTab: () => this.switchToNextTab(),
         onRenameActiveTab: () => this.renameActiveTab(),
-        onShowSettings: () => this.settingsModalManager.showSettingsModal(),
+        onToggleTheme: () => this.toggleTheme(),
         onZoomIn: () => this.zoomIn(),
         onZoomOut: () => this.zoomOut(),
       },
@@ -84,6 +78,9 @@ export class EditorManager {
 
     // Initialize UI
     this.eventHandlers.initialize();
+
+    // Set theme toggle icon according to current theme
+    this.updateThemeToggleButton(this.settingsManager.getTheme());
 
     // Create initial tab
     this.createNewTab(
@@ -498,5 +495,26 @@ export class EditorManager {
     this.editorView.dispatch({
       effects: this.languageConf.reconfigure(langExtension),
     });
+  }
+
+  // Theme toggle handling
+  private toggleTheme(): void {
+    const current = this.settingsManager.getTheme();
+    const newTheme = current === "dracula" ? "githubLight" : "dracula";
+    this.settingsManager.setTheme(newTheme);
+
+    const themeExtension = getThemeExtension(newTheme);
+    this.editorView.dispatch({
+      effects: this.themeConf.reconfigure(themeExtension),
+    });
+
+    this.updateThemeToggleButton(newTheme);
+  }
+
+  private updateThemeToggleButton(themeId: string): void {
+    const btn = document.getElementById("btn-theme-toggle");
+    if (!btn) return;
+    // use moon for dark theme, sun for light theme
+    btn.textContent = themeId === "dracula" ? "☾" : "☀";
   }
 }
