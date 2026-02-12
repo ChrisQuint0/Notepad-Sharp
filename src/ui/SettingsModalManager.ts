@@ -1,12 +1,11 @@
 // src/ui/SettingsModalManager.ts
 
 import { SettingsManager } from "../managers/SettingsManager";
-import { AVAILABLE_THEMES, getThemeExtension } from "../utils/themeUtils";
+import { AVAILABLE_THEMES } from "../utils/themeUtils";
 
 export class SettingsModalManager {
   private settingsManager: SettingsManager;
   private onThemeChanged: (theme: string) => void;
-  private _currentActiveTab: "appearance" = "appearance";
 
   constructor(
     settingsManager: SettingsManager,
@@ -50,7 +49,6 @@ export class SettingsModalManager {
   }
 
   showSettingsModal(): void {
-    this._currentActiveTab = "appearance";
     this.switchTab("appearance");
     this.setupThemeChangeHandler();
     this.loadThemeSettings();
@@ -82,7 +80,6 @@ export class SettingsModalManager {
   }
 
   private switchTab(tab: "appearance"): void {
-    this._currentActiveTab = tab;
     const appearanceTab = document.getElementById("settings-tab-appearance");
     const appearancePanel = document.getElementById("appearance-panel");
     appearanceTab?.classList.add("active");

@@ -20,8 +20,8 @@ import { SettingsModalManager } from "../ui/SettingsModalManager";
 import { EventHandlers } from "../ui/EventHandlers";
 
 import { EDITOR_CONFIG, ZOOM_CONFIG } from "../constants";
-import { getLanguageExtension, getLanguageId } from "../utils/languageDetector";
-import { expectsInput, extractFileName } from "../utils/helpers";
+import { getLanguageExtension } from "../utils/languageDetector";
+import { extractFileName } from "../utils/helpers";
 import { getThemeExtension } from "../utils/themeUtils";
 import { bracketMatching } from "@codemirror/language";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
@@ -30,7 +30,6 @@ import { foldGutter, foldKeymap } from "@codemirror/language";
 export class EditorManager {
   private tabManager: TabManager;
   private settingsManager: SettingsManager;
-  private fileService: FileService;
   private fileService: FileService;
   private tabRenderer: TabRenderer;
   private modalManager: ModalManager;
