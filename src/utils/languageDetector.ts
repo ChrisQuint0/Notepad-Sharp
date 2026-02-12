@@ -30,6 +30,8 @@ export function getLanguageExtension(filePath: string | null) {
       return [java()];
     case "xml":
       return [xml()];
+    case "xsl":
+      return [xml()];
     default:
       return [];
   }
