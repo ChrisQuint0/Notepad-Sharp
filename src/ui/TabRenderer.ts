@@ -10,7 +10,6 @@ export class TabRenderer {
     | ((sourceId: number, targetIndex: number) => void)
     | null = null;
   private editingTabId: number | null = null;
-  private insertBefore: boolean = true;
   private draggedTabId: number | null = null;
   private draggedEl: HTMLElement | null = null;
 
@@ -194,7 +193,6 @@ export class TabRenderer {
       const startX = e.clientX;
       const startY = e.clientY;
       const sourceId = tab.id;
-      const originalSibling = tabEl.nextSibling;
       const placeholder = document.createElement("div");
       placeholder.className = "tab-placeholder";
       placeholder.style.width = `${tabEl.getBoundingClientRect().width}px`;
@@ -261,7 +259,7 @@ export class TabRenderer {
         }
       };
 
-      const onMouseUp = (up: MouseEvent) => {
+      const onMouseUp = () => {
         document.removeEventListener("mousemove", onMouseMove);
         document.removeEventListener("mouseup", onMouseUp);
 
@@ -279,7 +277,6 @@ export class TabRenderer {
         tabEl.style.width = "";
         tabEl.style.zIndex = "";
 
-        const index = Array.from(tabBar.children).indexOf(placeholder);
         tabBar.insertBefore(tabEl, placeholder);
         placeholder.remove();
 
