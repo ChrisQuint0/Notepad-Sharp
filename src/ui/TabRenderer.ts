@@ -186,6 +186,10 @@ export class TabRenderer {
       // Avoid starting drag when renaming input is active
       if (this.editingTabId !== null) return;
 
+      // If user clicked the close button, don't initiate dragging — allow native click to close
+      const target = e.target as HTMLElement;
+      if (target && target.closest && target.closest(".tab-close")) return;
+
       const tabBar = document.getElementById("tab-bar");
       if (!tabBar) return;
 
@@ -264,8 +268,7 @@ export class TabRenderer {
         document.removeEventListener("mouseup", onMouseUp);
 
         if (!dragging) {
-          // treat as click
-          tabEl.click();
+          // Not a drag — let the native click event fire (so close button clicks work reliably)
           return;
         }
 

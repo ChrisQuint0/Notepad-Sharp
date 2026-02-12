@@ -143,7 +143,7 @@ body {
   color: #969696;
   border: none;
   border-right: 1px solid #181a1f;
-  cursor: pointer;
+  cursor: default;
   font-size: 13px;
   white-space: nowrap;
   transition: background-color 0.1s ease;
@@ -153,8 +153,8 @@ body {
   user-select: none;
 }
 
-.tab {
-  cursor: grab;
+.tab:hover {
+  cursor: pointer;
 }
 
 .tab.dragging {
@@ -162,7 +162,8 @@ body {
   opacity: 0.9;
 }
 
-.template-list { display: none; }
+.template-list {
+  display: none;
   background: #282c34;
   color: #abb2bf;
 }
@@ -182,6 +183,7 @@ body {
   border-radius: 3px;
   opacity: 0;
   transition: opacity 0.1s ease;
+  cursor: pointer;
 }
 
 .tab:hover .tab-close {
@@ -291,19 +293,21 @@ body {
 /* Theme toggle styling: push to far right and simple icon */
 .theme-toggle {
   margin-left: auto;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
   color: #e6eef0;
-  border: 1px solid rgba(255,255,255,0.03);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 18px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
-  transition: background 0.12s ease, transform 0.06s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition:
+    background 0.12s ease,
+    transform 0.06s ease;
 }
 
 .theme-toggle:hover {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
   transform: translateY(-1px);
 }
 
