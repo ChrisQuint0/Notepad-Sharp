@@ -1,27 +1,20 @@
 # Notepad-Sharp
 
-Notepad-Sharp is a lightweight desktop code notepad built with Vite, TypeScript and Tauri. It focuses on fast, distraction-free editing with multi-tab support, configurable templates, theme previews and a simple remote code runner powered by the public Piston API.
+Notepad# is a lightweight desktop code notepad built with Vite, TypeScript and Tauri. It focuses on fast, distraction-free editing with simple, familiar editor features and native file integration.
 
 ![Notepad-Sharp Preview](preview.png)
 
 Website: https://notepad-sharp.vercel.app/
 
-**Highlights & Features**
+## Features
 
-- Multi-tab editor with drag-to-reorder, rename, save status badges and per-tab cursor/scroll restore.
-- Syntax highlighting using CodeMirror 6 with language extensions (C/C++, Java, XML, basic fallbacks).
-- Built-in code templates (C#, C++, Python, Java) plus custom templates editable in the Settings modal.
-- Settings modal with template editing, add/delete custom templates, and theme preview/save (localStorage-backed).
-- Theme support: many CodeMirror themes are available via the theme selector and previewed live.
-- File operations via Tauri: open, save, rename, and file dialogs with useful filters.
-- Integrated code runner modal: send code to the Piston API, provide stdin, and view formatted output (compile/runtime handling included).
-- Useful editor features: undo/redo, indentation markers, fold gutter, line numbers, and zoom (font-size) controls.
-- Keyboard shortcuts: Ctrl+S (save), Ctrl+O (open), Ctrl+N (new tab), Ctrl+W (close), Ctrl+Tab (next tab), Alt+N (runner), Ctrl+3/4/5/6 (insert templates), F2 (rename), +=/- zoom.
+- Multi-tab editor with reorderable tabs (drag), rename, close, and per-tab cursor/scroll restore.
+- Syntax highlighting via CodeMirror 6 with language support for C/C++, Java, XML and additional fallbacks (plus a C# helper integration).
+- Two curated themes: **Dracula** (dark) and **GitHub Light** (light) with a toolbar theme toggle that switches the whole UI (toolbar, tabs, dropdowns, editor) between light and dark styles.
+- File operations powered by Tauri: Open, Save, Rename, and native file dialogs.
+- Editor niceties: undo/redo, fold gutter, indentation markers, line numbers, and zoom (font-size) controls.
+- Keyboard shortcuts: `Ctrl+S` (save), `Ctrl+O` (open), `Ctrl+N` (new tab), `Ctrl+W` (close active tab), `Ctrl+Tab` (next tab), `F2` (rename tab), `Ctrl+=`/`Ctrl+-` (zoom), `Ctrl+,` (toggle theme).
 
-Supported/Targeted languages for templates & runner
+## License
 
-- C# (template provided; execution shows a C# warning modal)
-- C/C++
-- Python
-- Java
-- Basic handling for XML and other filetypes (syntax fallback)
+This project is available under the license in `LICENSE`.
