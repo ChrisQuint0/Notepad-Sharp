@@ -22,6 +22,7 @@ import { EDITOR_CONFIG, ZOOM_CONFIG } from "../constants";
 import { getLanguageExtension } from "../utils/languageDetector";
 import { extractFileName } from "../utils/helpers";
 import { getThemeExtension } from "../utils/themeUtils";
+import { getThemeType } from "../utils/themeUtils";
 import { bracketMatching } from "@codemirror/language";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import { foldGutter, foldKeymap } from "@codemirror/language";
@@ -80,7 +81,9 @@ export class EditorManager {
     this.eventHandlers.initialize();
 
     // Set theme toggle icon according to current theme
-    this.updateThemeToggleButton(this.settingsManager.getTheme());
+    const currentTheme = this.settingsManager.getTheme();
+    this.updateThemeToggleButton(currentTheme);
+    this.applyThemeClass(currentTheme);
 
     // Create initial tab
     this.createNewTab(
@@ -460,6 +463,9 @@ export class EditorManager {
       effects: this.themeConf.reconfigure(themeExtension),
     });
 
+    // Apply DOM class for light/dark styling
+    this.applyThemeClass(theme);
+
     console.log("Editor theme updated!");
   }
 
@@ -509,6 +515,22 @@ export class EditorManager {
     });
 
     this.updateThemeToggleButton(newTheme);
+    this.applyThemeClass(newTheme);
+  }
+
+  private applyThemeClass(themeId: string): void {
+    try {
+      const type = getThemeType(themeId);
+      if (type === "light") {
+        document.body.classList.add("light-theme");
+        document.body.classList.remove("dark-theme");
+      } else {
+        document.body.classList.remove("light-theme");
+        document.body.classList.add("dark-theme");
+      }
+    } catch (err) {
+      console.error("Failed to apply theme class:", err);
+    }
   }
 
   private updateThemeToggleButton(themeId: string): void {

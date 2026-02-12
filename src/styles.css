@@ -311,6 +311,78 @@ body {
   transform: translateY(-1px);
 }
 
+/* Light theme overrides (GitHub Light aesthetic) */
+body.light-theme {
+  background: #ffffff;
+  color: #24292e;
+}
+
+body.light-theme #app {
+  background: #ffffff;
+}
+
+body.light-theme #toolbar {
+  background: #f6f8fa; /* GitHub toolbar-like */
+  color: #24292e;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+body.light-theme #toolbar button {
+  color: #24292e;
+}
+
+body.light-theme #toolbar button:hover {
+  background: rgba(27, 31, 35, 0.04);
+}
+
+body.light-theme .theme-toggle {
+  background: rgba(0, 0, 0, 0.03);
+  color: #24292e;
+  border: 1px solid rgba(27, 31, 35, 0.06);
+}
+
+body.light-theme #tab-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+body.light-theme .tab {
+  color: #24292e;
+  background: transparent;
+  border-right: 1px solid #eaecef;
+}
+
+body.light-theme .tab:hover {
+  background: #f6f8fa;
+}
+
+body.light-theme .tab.active {
+  background: #ffffff;
+  font-weight: 600;
+  color: #24292e;
+}
+
+body.light-theme .tab-close {
+  color: #57606a;
+}
+
+body.light-theme .dropdown-content {
+  background: #ffffff;
+  border: 1px solid #e1e4e8;
+  color: #24292e;
+}
+
+body.light-theme .dropdown-item:hover {
+  background: #f6f8fa;
+}
+
+/* Ensure CodeMirror editor background is still controlled by the theme extension, but fallback */
+body.light-theme .cm-editor,
+body.light-theme .cm-scroller {
+  background: #ffffff;
+  color: #24292e;
+}
+
 /* ============================================================================ */
 /* Modal Styles */
 /* ============================================================================ */

@@ -30,6 +30,11 @@ export function getThemeExtension(themeId: string): Extension {
   return theme.extension;
 }
 
+export function getThemeType(themeId: string): "light" | "dark" {
+  const theme = AVAILABLE_THEMES.find((t) => t.id === themeId);
+  return theme ? theme.type : "dark";
+}
+
 export function getThemeName(themeId: string): string {
   const theme = AVAILABLE_THEMES.find((t) => t.id === themeId);
   return theme ? theme.name : "One Dark (Default)";
