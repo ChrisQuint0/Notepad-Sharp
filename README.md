@@ -1,35 +1,35 @@
 # Notepad-Sharp
 
-Built for Christopher Quinto's Potato Laptop, Notepad# is a lightweight, minimalist desktop code notepad built with Vite + TypeScript + Tauri. It gives you a distraction-free UI, multi-tab editing, quick templates for common competitive-programming languages, and a simple code runner powered by the public Piston API.
+Notepad-Sharp is a lightweight desktop code notepad built with Vite, TypeScript and Tauri. It focuses on fast, distraction-free editing with multi-tab support, configurable templates, theme previews and a simple remote code runner powered by the public Piston API.
 
 ![Notepad-Sharp Preview](preview.png)
 
-## Website:
+Website: https://notepad-sharp.vercel.app/
 
-https://notepad-sharp.vercel.app/
+**Highlights & Features**
 
-## What it does
+- Multi-tab editor with drag-to-reorder, rename, save status badges and per-tab cursor/scroll restore.
+- Syntax highlighting using CodeMirror 6 with language extensions (C/C++, Java, XML, basic fallbacks).
+- Built-in code templates (C#, C++, Python, Java) plus custom templates editable in the Settings modal.
+- Settings modal with template editing, add/delete custom templates, and theme preview/save (localStorage-backed).
+- Theme support: many CodeMirror themes are available via the theme selector and previewed live.
+- File operations via Tauri: open, save, rename, and file dialogs with useful filters.
+- Integrated code runner modal: send code to the Piston API, provide stdin, and view formatted output (compile/runtime handling included).
+- Useful editor features: undo/redo, indentation markers, fold gutter, line numbers, and zoom (font-size) controls.
+- Keyboard shortcuts: Ctrl+S (save), Ctrl+O (open), Ctrl+N (new tab), Ctrl+W (close), Ctrl+Tab (next tab), Alt+N (runner), Ctrl+3/4/5/6 (insert templates), F2 (rename), +=/- zoom.
 
-- Multi-tab editor with modified-state badges and title updates.
-- Syntax highlighting via CodeMirror (C/C++, Java, basic support for other extensions).
-- File open/save backed by Tauri FS + dialog plugins with language filters.
-- One-click language templates (C#, C++, Python, Java) and keyboard shortcuts for each.
-- Code runner modal with input/output panes, basic input detection, and execution through Piston (C/C++/Java/Python/JS; C# execution is blocked and shows a warning).
-- Minimal shortcuts: Ctrl+S: save, Ctrl+O: open, Ctrl+N: new tab, Ctrl+W: close tab, Ctrl+Tab: next tab, Alt+N: open runner, Ctrl+3/4/5/6: insert templates.
+Supported/Targeted languages for templates & runner
 
-## Tech stack
+- C# (template provided; execution shows a C# warning modal)
+- C/C++
+- Python
+- Java
+- Basic handling for XML and other filetypes (syntax fallback)
 
-- Vite + TypeScript frontend
-- CodeMirror 6 for editing
-- Tauri 2 (FS, dialog, http, opener plugins)
-- Piston HTTP API for remote execution
+Project layout (important files)
 
-## Just In Case You Want To Work On It
-
-1. Install prerequisites: Node.js (LTS), Rust toolchain, and the Tauri 2 prerequisites for your OS.
-2. Install deps: `npm install`
-3. Run the desktop app in dev mode: `npm run tauri dev`
-4. Build web assets: `npm run build`
-5. Build the desktop bundle: `npm run tauri build`
-
-Network access is required for code execution because Piston runs remotely; editing and file operations work offline.
+- src/main.ts — application bootstrap
+- src/managers — core managers (`EditorManager`, `TabManager`, `SettingsManager`)
+- src/services — `FileService`, `PistonService`, `TemplateService` (Tauri + Piston integrations)
+- src/ui — UI helpers and modal/tab rendering
+- src/utils — helpers for language detection, themes, and small utilities
