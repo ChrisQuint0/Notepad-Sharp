@@ -1,7 +1,4 @@
 // src/ui/EventHandlers.ts
-
-import { SettingsManager } from "../managers/SettingsManager";
-
 interface EventCallbacks {
   onNewFile: () => void;
   onOpenFile: () => void;
@@ -16,11 +13,9 @@ interface EventCallbacks {
 
 export class EventHandlers {
   private callbacks: EventCallbacks;
-  private settingsManager: SettingsManager;
 
-  constructor(callbacks: EventCallbacks, settingsManager: SettingsManager) {
+  constructor(callbacks: EventCallbacks) {
     this.callbacks = callbacks;
-    this.settingsManager = settingsManager;
   }
 
   initialize(): void {

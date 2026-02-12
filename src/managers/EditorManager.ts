@@ -56,21 +56,18 @@ export class EditorManager {
         this.handleTabReorder(sourceId, targetIndex),
     );
 
-    // Initialize event handlers (pass settingsManager for dropdown updates)
-    this.eventHandlers = new EventHandlers(
-      {
-        onNewFile: () => this.createNewTab(),
-        onOpenFile: () => this.openFile(),
-        onSaveFile: () => this.saveFile(),
-        onCloseActiveTab: () => this.closeActiveTab(),
-        onSwitchNextTab: () => this.switchToNextTab(),
-        onRenameActiveTab: () => this.renameActiveTab(),
-        onToggleTheme: () => this.toggleTheme(),
-        onZoomIn: () => this.zoomIn(),
-        onZoomOut: () => this.zoomOut(),
-      },
-      this.settingsManager,
-    );
+    // Initialize event handlers
+    this.eventHandlers = new EventHandlers({
+      onNewFile: () => this.createNewTab(),
+      onOpenFile: () => this.openFile(),
+      onSaveFile: () => this.saveFile(),
+      onCloseActiveTab: () => this.closeActiveTab(),
+      onSwitchNextTab: () => this.switchToNextTab(),
+      onRenameActiveTab: () => this.renameActiveTab(),
+      onToggleTheme: () => this.toggleTheme(),
+      onZoomIn: () => this.zoomIn(),
+      onZoomOut: () => this.zoomOut(),
+    });
 
     // Initialize editor
     this.languageConf = new Compartment();
@@ -448,25 +445,6 @@ export class EditorManager {
         "error",
       );
     }
-  }
-
-  // ========================================================================
-  private handleThemeChanged(theme: string): void {
-    console.log("Theme changed to:", theme);
-
-    // Save the theme
-    this.settingsManager.setTheme(theme);
-
-    // Update the editor theme
-    const themeExtension = getThemeExtension(theme);
-    this.editorView.dispatch({
-      effects: this.themeConf.reconfigure(themeExtension),
-    });
-
-    // Apply DOM class for light/dark styling
-    this.applyThemeClass(theme);
-
-    console.log("Editor theme updated!");
   }
 
   // ========================================================================

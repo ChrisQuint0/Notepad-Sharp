@@ -383,6 +383,26 @@ body.light-theme .cm-scroller {
   color: #24292e;
 }
 
+/* Dark theme tweaks: make tab borders lighter so tabs pop against Dracula */
+body.dark-theme #tab-bar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.dark-theme .tab {
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
+  color: #dfe6ee;
+}
+
+body.dark-theme .tab:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+body.dark-theme .tab.active {
+  background: rgba(255, 255, 255, 0.02);
+  color: #ffffff;
+  font-weight: 600;
+}
+
 /* ============================================================================ */
 /* Modal Styles */
 /* ============================================================================ */

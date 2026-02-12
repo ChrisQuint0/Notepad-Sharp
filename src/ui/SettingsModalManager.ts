@@ -79,7 +79,7 @@ export class SettingsModalManager {
     modal?.classList.remove("show");
   }
 
-  private switchTab(tab: "appearance"): void {
+  private switchTab(_tab: "appearance"): void {
     const appearanceTab = document.getElementById("settings-tab-appearance");
     const appearancePanel = document.getElementById("appearance-panel");
     appearanceTab?.classList.add("active");
