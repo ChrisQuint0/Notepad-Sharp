@@ -10,9 +10,24 @@
   <body>
     <div id="app">
       <div id="toolbar">
-        <button id="btn-new" tabindex="-1">New</button>
-        <button id="btn-open" tabindex="-1">Open</button>
-        <button id="btn-save" tabindex="-1">Save</button>
+        <div class="dropdown">
+          <button id="btn-file" tabindex="-1">File</button>
+          <div class="dropdown-content file">
+            <button class="dropdown-item" data-action="new">
+              <span class="label">New</span>
+              <span class="shortcut">Ctrl+N</span>
+            </button>
+            <button class="dropdown-item" data-action="open">
+              <span class="label">Open</span>
+              <span class="shortcut">Ctrl+O</span>
+            </button>
+            <button class="dropdown-item" data-action="save">
+              <span class="label">Save</span>
+              <span class="shortcut">Ctrl+S</span>
+            </button>
+          </div>
+        </div>
+
         <div class="dropdown">
           <button id="btn-view" tabindex="-1">View</button>
           <div class="dropdown-content view">
@@ -26,8 +41,8 @@
             </button>
           </div>
         </div>
+
         <button id="btn-settings" tabindex="-1">Settings</button>
-        <!-- Run and Templates removed -->
       </div>
       <div id="tab-bar">
         <!-- Tabs will be dynamically added here -->

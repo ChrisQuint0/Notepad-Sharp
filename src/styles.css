@@ -258,6 +258,36 @@ body {
   margin-left: 20px;
 }
 
+.dropdown-item .label {
+  flex: 1 1 auto;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* File dropdown should align with the left edge of the File button */
+.dropdown-content.file {
+  left: 0;
+  right: auto;
+  min-width: 240px;
+}
+
+/* Add separators at top and bottom of file menu for visual grouping */
+.dropdown-content.file .dropdown-item:first-child {
+  border-top: 1px solid #3e3e42;
+}
+.dropdown-content.file .dropdown-item:last-child {
+  border-bottom: 1px solid #3e3e42;
+}
+
+/* View dropdown should also align to its button */
+.dropdown-content.view {
+  left: 0;
+  right: auto;
+  min-width: 220px;
+}
+
 /* ============================================================================ */
 /* Modal Styles */
 /* ============================================================================ */

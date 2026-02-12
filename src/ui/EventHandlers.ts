@@ -31,18 +31,7 @@ export class EventHandlers {
   }
 
   private setupButtonHandlers(): void {
-    document
-      .getElementById("btn-new")
-      ?.addEventListener("click", () => this.callbacks.onNewFile());
-
-    document
-      .getElementById("btn-open")
-      ?.addEventListener("click", () => this.callbacks.onOpenFile());
-
-    document
-      .getElementById("btn-save")
-      ?.addEventListener("click", () => this.callbacks.onSaveFile());
-
+    // File actions are in a dropdown now; Settings remains a direct button
     document
       .getElementById("btn-settings")
       ?.addEventListener("click", () => this.callbacks.onShowSettings());
@@ -53,9 +42,42 @@ export class EventHandlers {
   }
 
   private setupDropdownHandlers(): void {
+    // File dropdown
+    document.getElementById("btn-file")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      // Close other dropdowns first
+      document
+        .querySelectorAll(".dropdown-content")
+        .forEach((d) => d.classList.remove("show"));
+      document
+        .querySelector(".dropdown-content.file")
+        ?.classList.toggle("show");
+    });
+
+    // Delegate clicks from file dropdown to callbacks
+    document
+      .querySelector(".dropdown-content.file")
+      ?.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        const item = target.closest(".dropdown-item") as HTMLElement;
+        if (!item) return;
+        const action = item.getAttribute("data-action");
+        if (action === "new") this.callbacks.onNewFile();
+        else if (action === "open") this.callbacks.onOpenFile();
+        else if (action === "save") this.callbacks.onSaveFile();
+        // hide dropdown after selection
+        document
+          .querySelectorAll(".dropdown-content")
+          .forEach((d) => d.classList.remove("show"));
+      });
+
     // View dropdown
     document.getElementById("btn-view")?.addEventListener("click", (e) => {
       e.stopPropagation();
+      // Close other dropdowns first
+      document
+        .querySelectorAll(".dropdown-content")
+        .forEach((d) => d.classList.remove("show"));
       document
         .querySelector(".dropdown-content.view")
         ?.classList.toggle("show");
