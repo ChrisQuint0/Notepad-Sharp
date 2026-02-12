@@ -6,15 +6,8 @@ interface EventCallbacks {
   onNewFile: () => void;
   onOpenFile: () => void;
   onSaveFile: () => void;
-  onRunCode: () => void;
-  onShowRunnerModal: () => void;
-  onHideRunnerModal: () => void;
-  onToggleInput: () => void;
-  onClearOutput: () => void;
-  onInsertTemplate: (type: string) => void;
   onCloseActiveTab: () => void;
   onSwitchNextTab: () => void;
-  onHideCSharpWarning: () => void;
   onRenameActiveTab: () => void;
   onShowSettings: () => void;
   onZoomIn: () => void;
@@ -51,54 +44,15 @@ export class EventHandlers {
       ?.addEventListener("click", () => this.callbacks.onSaveFile());
 
     document
-      .getElementById("btn-run")
-      ?.addEventListener("click", () => this.callbacks.onShowRunnerModal());
-
-    document
       .getElementById("btn-settings")
       ?.addEventListener("click", () => this.callbacks.onShowSettings());
   }
 
   private setupModalHandlers(): void {
-    // Runner modal
-    document
-      .getElementById("modal-close")
-      ?.addEventListener("click", () => this.callbacks.onHideRunnerModal());
-
-    document.getElementById("runner-modal")?.addEventListener("click", (e) => {
-      if ((e.target as HTMLElement).id === "runner-modal") {
-        this.callbacks.onHideRunnerModal();
-      }
-    });
-
-    document
-      .getElementById("toggle-input")
-      ?.addEventListener("click", () => this.callbacks.onToggleInput());
-
-    document
-      .getElementById("btn-clear-output")
-      ?.addEventListener("click", () => this.callbacks.onClearOutput());
-
-    document
-      .getElementById("btn-run-code")
-      ?.addEventListener("click", () => this.callbacks.onRunCode());
-
-    // C# Warning modal
-    document
-      .getElementById("csharp-warning-close")
-      ?.addEventListener("click", () => this.callbacks.onHideCSharpWarning());
+    // No runner modal handlers (feature removed)
   }
 
   private setupDropdownHandlers(): void {
-    // Templates dropdown
-    document.getElementById("btn-templates")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      this.updateTemplateDropdown();
-      document
-        .querySelector(".dropdown-content.templates")
-        ?.classList.toggle("show");
-    });
-
     // View dropdown
     document.getElementById("btn-view")?.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -113,20 +67,6 @@ export class EventHandlers {
       });
     });
 
-    // Delegate event handling for template dropdown items
-    document
-      .querySelector(".dropdown-content.templates")
-      ?.addEventListener("click", (e) => {
-        const target = e.target as HTMLElement;
-        const item = target.closest(".dropdown-item") as HTMLElement;
-        if (item) {
-          const templateType = item.getAttribute("data-template");
-          if (templateType) {
-            this.callbacks.onInsertTemplate(templateType);
-          }
-        }
-      });
-
     // View dropdown items
     document.getElementById("zoom-in-item")?.addEventListener("click", () => {
       this.callbacks.onZoomIn();
@@ -137,79 +77,12 @@ export class EventHandlers {
     });
   }
 
-  private updateTemplateDropdown(): void {
-    const dropdownContent = document.querySelector(
-      ".dropdown-content.templates"
-    );
-    if (!dropdownContent) return;
-
-    // Clear existing items
-    dropdownContent.innerHTML = "";
-
-    // Get all templates from SettingsManager
-    const templates = this.settingsManager.getAllTemplates();
-
-    // Create dropdown items for each template
-    templates.forEach((template) => {
-      const item = document.createElement("button");
-      item.className = "dropdown-item";
-      item.setAttribute("data-template", template.key);
-
-      const nameSpan = document.createElement("span");
-      nameSpan.textContent = template.name;
-
-      item.appendChild(nameSpan);
-
-      // Add keyboard shortcut hint for default templates
-      if (template.key === "csharp") {
-        const shortcut = document.createElement("span");
-        shortcut.className = "shortcut";
-        shortcut.textContent = "Ctrl+3";
-        item.appendChild(shortcut);
-      } else if (template.key === "cpp") {
-        const shortcut = document.createElement("span");
-        shortcut.className = "shortcut";
-        shortcut.textContent = "Ctrl+4";
-        item.appendChild(shortcut);
-      } else if (template.key === "python") {
-        const shortcut = document.createElement("span");
-        shortcut.className = "shortcut";
-        shortcut.textContent = "Ctrl+5";
-        item.appendChild(shortcut);
-      } else if (template.key === "java") {
-        const shortcut = document.createElement("span");
-        shortcut.className = "shortcut";
-        shortcut.textContent = "Ctrl+6";
-        item.appendChild(shortcut);
-      }
-
-      dropdownContent.appendChild(item);
-    });
-  }
-
   private setupKeyboardShortcuts(): void {
     document.addEventListener("keydown", (e) => {
       // F2 - Rename active tab
       if (e.key === "F2") {
         e.preventDefault();
         this.callbacks.onRenameActiveTab();
-        return;
-      }
-
-      // Escape key
-      if (e.key === "Escape") {
-        const modal = document.getElementById("runner-modal");
-        if (modal?.classList.contains("show")) {
-          e.preventDefault();
-          this.callbacks.onHideRunnerModal();
-          return;
-        }
-      }
-
-      // Alt+N - Run code
-      if (e.altKey && e.key === "n") {
-        e.preventDefault();
-        this.callbacks.onShowRunnerModal();
         return;
       }
 
@@ -230,10 +103,6 @@ export class EventHandlers {
       }
 
       const shortcuts: Record<string, () => void> = {
-        "3": () => this.callbacks.onInsertTemplate("csharp"),
-        "4": () => this.callbacks.onInsertTemplate("cpp"),
-        "5": () => this.callbacks.onInsertTemplate("python"),
-        "6": () => this.callbacks.onInsertTemplate("java"),
         s: () => this.callbacks.onSaveFile(),
         o: () => this.callbacks.onOpenFile(),
         n: () => this.callbacks.onNewFile(),
@@ -248,10 +117,5 @@ export class EventHandlers {
         handler();
       }
     });
-  }
-
-  // Public method to refresh dropdown (called after template changes)
-  public refreshTemplateDropdown(): void {
-    this.updateTemplateDropdown();
   }
 }

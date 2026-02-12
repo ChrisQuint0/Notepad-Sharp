@@ -68,19 +68,7 @@ body {
   background: #1e1e1e;
 }
 
-#btn-run {
-  background: #0e639c;
-  color: white;
-  margin-left: 8px;
-}
-
-#btn-run:hover {
-  background: #1177bb;
-}
-
-#btn-run:active {
-  background: #0d5a8f;
-}
+/* Run button removed */
 
 #editor-container {
   flex: 1;
@@ -174,33 +162,7 @@ body {
   opacity: 0.9;
 }
 
-.tab-placeholder {
-  display: inline-block;
-  vertical-align: top;
-  background: rgba(97, 175, 239, 0.08);
-  border-radius: 4px;
-  box-sizing: border-box;
-  border: 1px dashed rgba(97, 175, 239, 0.35);
-  margin: 0 2px;
-}
-
-.tab:focus {
-  outline: none;
-}
-
-.tab:hover {
-  background: #2a2d2e;
-}
-
-.tab.drop-before {
-  border-left: 3px solid #61afef;
-}
-
-.tab.drop-after {
-  border-right: 3px solid #61afef;
-}
-
-.tab.active {
+.template-list { display: none; }
   background: #282c34;
   color: #abb2bf;
 }

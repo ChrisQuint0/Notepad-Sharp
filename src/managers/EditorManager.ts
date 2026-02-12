@@ -14,8 +14,6 @@ import { Compartment } from "@codemirror/state";
 import { TabManager } from "./TabManager";
 import { SettingsManager } from "./SettingsManager";
 import { FileService } from "../services/FileService";
-import { PistonService } from "../services/PistonService";
-import { TemplateService } from "../services/TemplateService";
 import { TabRenderer } from "../ui/TabRenderer";
 import { ModalManager } from "../ui/ModalManager";
 import { SettingsModalManager } from "../ui/SettingsModalManager";
@@ -33,8 +31,7 @@ export class EditorManager {
   private tabManager: TabManager;
   private settingsManager: SettingsManager;
   private fileService: FileService;
-  private pistonService: PistonService;
-  private templateService: TemplateService;
+  private fileService: FileService;
   private tabRenderer: TabRenderer;
   private modalManager: ModalManager;
   private settingsModalManager: SettingsModalManager;
@@ -50,12 +47,9 @@ export class EditorManager {
     this.tabManager = new TabManager();
     this.settingsManager = new SettingsManager();
     this.fileService = new FileService();
-    this.pistonService = new PistonService();
-    this.templateService = new TemplateService(this.settingsManager);
     this.modalManager = new ModalManager();
     this.settingsModalManager = new SettingsModalManager(
       this.settingsManager,
-      () => this.handleTemplatesChanged(),
       (theme) => this.handleThemeChanged(theme),
     );
 
@@ -74,15 +68,8 @@ export class EditorManager {
         onNewFile: () => this.createNewTab(),
         onOpenFile: () => this.openFile(),
         onSaveFile: () => this.saveFile(),
-        onRunCode: () => this.runCode(),
-        onShowRunnerModal: () => this.modalManager.showRunnerModal(),
-        onHideRunnerModal: () => this.modalManager.hideRunnerModal(),
-        onToggleInput: () => this.modalManager.toggleInputSection(),
-        onClearOutput: () => this.modalManager.clearOutput(),
-        onInsertTemplate: (type) => this.insertTemplate(type),
         onCloseActiveTab: () => this.closeActiveTab(),
         onSwitchNextTab: () => this.switchToNextTab(),
-        onHideCSharpWarning: () => this.modalManager.hideCSharpWarningModal(),
         onRenameActiveTab: () => this.renameActiveTab(),
         onShowSettings: () => this.settingsModalManager.showSettingsModal(),
         onZoomIn: () => this.zoomIn(),
@@ -465,37 +452,6 @@ export class EditorManager {
   }
 
   // ========================================================================
-  // Template Operations
-  // ========================================================================
-
-  public insertTemplate(templateType: string): void {
-    const template = this.templateService.getTemplate(templateType);
-    if (!template) return;
-
-    const currentPos = this.editorView.state.selection.main.head;
-
-    this.editorView.dispatch({
-      changes: {
-        from: currentPos,
-        to: currentPos,
-        insert: template,
-      },
-      selection: { anchor: currentPos + template.length },
-    });
-
-    const activeTab = this.tabManager.getActiveTab();
-    if (activeTab) {
-      this.tabManager.markTabModified(activeTab.id);
-      this.renderTabs();
-    }
-  }
-
-  private handleTemplatesChanged(): void {
-    // Refresh the template dropdown
-    this.eventHandlers.refreshTemplateDropdown();
-    console.log("Templates updated and dropdown refreshed!");
-  }
-
   private handleThemeChanged(theme: string): void {
     console.log("Theme changed to:", theme);
 
@@ -512,68 +468,7 @@ export class EditorManager {
   }
 
   // ========================================================================
-  // Code Execution
-  // ========================================================================
-
-  private async runCode(): Promise<void> {
-    const activeTab = this.tabManager.getActiveTab();
-    if (!activeTab) {
-      this.modalManager.displayOutput("No active file to run!", "error");
-      return;
-    }
-
-    const language = getLanguageId(activeTab.path);
-    if (!language) {
-      this.modalManager.displayOutput(
-        "Unsupported file type! Supported: .cs, .cpp, .c, .py, .java, .js",
-        "error",
-      );
-      return;
-    }
-
-    if (language === "csharp") {
-      this.modalManager.showCSharpWarningModal();
-      return;
-    }
-
-    const inputTextarea = document.getElementById(
-      "code-input",
-    ) as HTMLTextAreaElement;
-    const stdin = inputTextarea?.value || "";
-
-    this.modalManager.setRunButtonState(true, "Running...");
-    this.modalManager.displayOutput("Executing code...", "running");
-
-    try {
-      const code = this.editorView.state.doc.toString();
-
-      if (expectsInput(code) && !stdin.trim()) {
-        this.modalManager.displayOutput(
-          "This program is waiting for input.\n\nPlease provide input in the Input box before running.",
-          "error",
-        );
-        return;
-      }
-
-      const result = await this.pistonService.executeCode(
-        language,
-        code,
-        stdin,
-      );
-      const { text, type } = this.pistonService.formatOutput(result);
-      this.modalManager.displayOutput(text, type);
-    } catch (error) {
-      console.error("Code execution error:", error);
-      this.modalManager.displayOutput(
-        `Error: ${
-          error instanceof Error ? error.message : "Failed to execute code"
-        }`,
-        "error",
-      );
-    } finally {
-      this.modalManager.setRunButtonState(false, "Run Code");
-    }
-  }
+  // (Code runner removed)
 
   // ========================================================================
   // UI Updates
