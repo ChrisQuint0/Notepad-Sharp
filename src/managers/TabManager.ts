@@ -12,7 +12,7 @@ export class TabManager {
   createTab(
     name: string = EDITOR_CONFIG.defaultFileName,
     path: string | null = null,
-    content: string = ""
+    content: string = "",
   ): Tab {
     const tab: Tab = {
       id: this.nextTabId++,
@@ -105,7 +105,7 @@ export class TabManager {
   updateTabEditorState(
     tabId: number,
     cursorPosition: number,
-    scrollTop: number
+    scrollTop: number,
   ): void {
     const tab = this.findTabById(tabId);
     if (tab) {
@@ -145,10 +145,32 @@ export class TabManager {
     }
   }
 
+  /**
+   * Move a tab to a new index in the tab list.
+   * @param tabId The id of the tab to move
+   * @param targetIndex The insertion index (0..tabs.length)
+   * @returns true if moved, false otherwise
+   */
+  moveTab(tabId: number, targetIndex: number): boolean {
+    const currentIndex = this.tabs.findIndex((t) => t.id === tabId);
+    if (currentIndex === -1) return false;
+
+    // Remove the tab from current position
+    const [tab] = this.tabs.splice(currentIndex, 1);
+
+    // Clamp targetIndex to valid range for insertion
+    const clamped = Math.max(0, Math.min(targetIndex, this.tabs.length));
+
+    // Insert at the new position
+    this.tabs.splice(clamped, 0, tab);
+
+    return true;
+  }
+
   private async confirmClose(tabName: string): Promise<boolean> {
     return await tauriConfirm(
       `Your changes will be lost if you don't save them.`,
-      { title: `Close ${tabName}?`, kind: "warning" }
+      { title: `Close ${tabName}?`, kind: "warning" },
     );
   }
 }

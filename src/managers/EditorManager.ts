@@ -56,14 +56,16 @@ export class EditorManager {
     this.settingsModalManager = new SettingsModalManager(
       this.settingsManager,
       () => this.handleTemplatesChanged(),
-      (theme) => this.handleThemeChanged(theme)
+      (theme) => this.handleThemeChanged(theme),
     );
 
     // Initialize tab renderer
     this.tabRenderer = new TabRenderer(
       (id) => this.switchToTab(id),
       (id) => this.closeTab(id),
-      (id, newName) => this.renameTab(id, newName)
+      (id, newName) => this.renameTab(id, newName),
+      (sourceId: number, targetIndex: number) =>
+        this.handleTabReorder(sourceId, targetIndex),
     );
 
     // Initialize event handlers (pass settingsManager for dropdown updates)
@@ -86,7 +88,7 @@ export class EditorManager {
         onZoomIn: () => this.zoomIn(),
         onZoomOut: () => this.zoomOut(),
       },
-      this.settingsManager
+      this.settingsManager,
     );
 
     // Initialize editor
@@ -101,7 +103,7 @@ export class EditorManager {
     this.createNewTab(
       EDITOR_CONFIG.defaultFileName,
       null,
-      EDITOR_CONFIG.welcomeMessage
+      EDITOR_CONFIG.welcomeMessage,
     );
 
     // Load saved zoom level
@@ -173,7 +175,7 @@ export class EditorManager {
     this.tabManager.updateTabEditorState(
       activeTab.id,
       cursorPosition,
-      scrollTop
+      scrollTop,
     );
   }
 
@@ -185,7 +187,7 @@ export class EditorManager {
     if (tab.cursorPosition !== undefined) {
       const pos = Math.min(
         tab.cursorPosition,
-        this.editorView.state.doc.length
+        this.editorView.state.doc.length,
       );
       this.editorView.dispatch({
         selection: { anchor: pos },
@@ -208,7 +210,7 @@ export class EditorManager {
   public zoomIn(): void {
     const newZoom = Math.min(
       this.currentZoom + ZOOM_CONFIG.step,
-      ZOOM_CONFIG.max
+      ZOOM_CONFIG.max,
     );
     this.setZoom(newZoom);
   }
@@ -216,7 +218,7 @@ export class EditorManager {
   public zoomOut(): void {
     const newZoom = Math.max(
       this.currentZoom - ZOOM_CONFIG.step,
-      ZOOM_CONFIG.min
+      ZOOM_CONFIG.min,
     );
     this.setZoom(newZoom);
   }
@@ -229,7 +231,9 @@ export class EditorManager {
       container.style.fontSize = `${fontSize}px`;
     }
     this.saveZoomLevel();
-    console.log(`Zoom set to ${zoomLevel}% (${(zoomLevel / 100) * ZOOM_CONFIG.baseFontSize}px)`);
+    console.log(
+      `Zoom set to ${zoomLevel}% (${(zoomLevel / 100) * ZOOM_CONFIG.baseFontSize}px)`,
+    );
   }
 
   private saveZoomLevel(): void {
@@ -261,7 +265,7 @@ export class EditorManager {
   public createNewTab(
     name: string = EDITOR_CONFIG.defaultFileName,
     path: string | null = null,
-    content: string = ""
+    content: string = "",
   ): void {
     // Save current tab state before creating new tab
     this.saveEditorState();
@@ -339,6 +343,17 @@ export class EditorManager {
     }
   }
 
+  private handleTabReorder(sourceId: number, targetIndex: number): void {
+    // Save state of current tab before reordering
+    this.saveEditorState();
+
+    const moved = this.tabManager.moveTab(sourceId, targetIndex);
+    if (!moved) return;
+
+    // Re-render tabs to reflect new order
+    this.renderTabs();
+  }
+
   public renameActiveTab(): void {
     const activeTabId = this.tabManager.getActiveTabId();
     if (activeTabId !== null) {
@@ -377,12 +392,19 @@ export class EditorManager {
         this.updateTitle(newName);
       }
 
-      this.modalManager.displayOutput(`File renamed to ${newName} successfully!`, "success");
+      this.modalManager.displayOutput(
+        `File renamed to ${newName} successfully!`,
+        "success",
+      );
       console.log("File renamed successfully!");
     } catch (error) {
       console.error("Error renaming file:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this.modalManager.displayOutput(`Failed to rename file: ${errorMessage}`, "error");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.modalManager.displayOutput(
+        `Failed to rename file: ${errorMessage}`,
+        "error",
+      );
       // Re-render to restore original name
       this.renderTabs();
     }
@@ -426,12 +448,19 @@ export class EditorManager {
       this.renderTabs();
       this.updateTitle(activeTab.name);
 
-      this.modalManager.displayOutput(`File "${activeTab.name}" saved successfully!`, "success");
+      this.modalManager.displayOutput(
+        `File "${activeTab.name}" saved successfully!`,
+        "success",
+      );
       console.log("File saved successfully!");
     } catch (error) {
       console.error("Error saving file:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this.modalManager.displayOutput(`Error saving file: ${errorMessage}`, "error");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.modalManager.displayOutput(
+        `Error saving file: ${errorMessage}`,
+        "error",
+      );
     }
   }
 
@@ -497,7 +526,7 @@ export class EditorManager {
     if (!language) {
       this.modalManager.displayOutput(
         "Unsupported file type! Supported: .cs, .cpp, .c, .py, .java, .js",
-        "error"
+        "error",
       );
       return;
     }
@@ -508,7 +537,7 @@ export class EditorManager {
     }
 
     const inputTextarea = document.getElementById(
-      "code-input"
+      "code-input",
     ) as HTMLTextAreaElement;
     const stdin = inputTextarea?.value || "";
 
@@ -521,7 +550,7 @@ export class EditorManager {
       if (expectsInput(code) && !stdin.trim()) {
         this.modalManager.displayOutput(
           "This program is waiting for input.\n\nPlease provide input in the Input box before running.",
-          "error"
+          "error",
         );
         return;
       }
@@ -529,16 +558,17 @@ export class EditorManager {
       const result = await this.pistonService.executeCode(
         language,
         code,
-        stdin
+        stdin,
       );
       const { text, type } = this.pistonService.formatOutput(result);
       this.modalManager.displayOutput(text, type);
     } catch (error) {
       console.error("Code execution error:", error);
       this.modalManager.displayOutput(
-        `Error: ${error instanceof Error ? error.message : "Failed to execute code"
+        `Error: ${
+          error instanceof Error ? error.message : "Failed to execute code"
         }`,
-        "error"
+        "error",
       );
     } finally {
       this.modalManager.setRunButtonState(false, "Run Code");

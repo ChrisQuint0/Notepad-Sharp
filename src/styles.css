@@ -13,7 +13,11 @@ body {
 }
 
 body {
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
   color: #abb2bf;
 }
 
@@ -161,12 +165,39 @@ body {
   user-select: none;
 }
 
+.tab {
+  cursor: grab;
+}
+
+.tab.dragging {
+  cursor: grabbing;
+  opacity: 0.9;
+}
+
+.tab-placeholder {
+  display: inline-block;
+  vertical-align: top;
+  background: rgba(97, 175, 239, 0.08);
+  border-radius: 4px;
+  box-sizing: border-box;
+  border: 1px dashed rgba(97, 175, 239, 0.35);
+  margin: 0 2px;
+}
+
 .tab:focus {
   outline: none;
 }
 
 .tab:hover {
   background: #2a2d2e;
+}
+
+.tab.drop-before {
+  border-left: 3px solid #61afef;
+}
+
+.tab.drop-after {
+  border-right: 3px solid #61afef;
 }
 
 .tab.active {
@@ -623,7 +654,11 @@ body {
   border-radius: 3px;
   padding: 2px 6px;
   font-size: 13px;
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
   outline: none;
   flex: 1;
   min-width: 60px;
@@ -900,7 +935,11 @@ body {
   border-radius: 5px;
   padding: 8px 12px;
   font-size: 13px;
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
   outline: none;
   transition: border-color 0.15s ease;
 }
@@ -1014,7 +1053,11 @@ body {
   border-radius: 5px;
   padding: 10px 12px;
   font-size: 13px;
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
   cursor: pointer;
   outline: none;
   transition: border-color 0.15s ease;
