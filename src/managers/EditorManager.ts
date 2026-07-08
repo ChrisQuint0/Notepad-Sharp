@@ -39,6 +39,7 @@ export class EditorManager {
   private languageConf: Compartment;
   private themeConf: Compartment;
   private currentZoom: number = ZOOM_CONFIG.default;
+  private tabStates: Map<number, EditorState>;
 
   constructor() {
     // Initialize services and managers
@@ -54,6 +55,7 @@ export class EditorManager {
       (id, newName) => this.renameTab(id, newName),
       (sourceId: number, targetIndex: number) =>
         this.handleTabReorder(sourceId, targetIndex),
+      () => this.createNewTab(),
     );
 
     // Initialize event handlers
@@ -73,7 +75,11 @@ export class EditorManager {
     // Initialize editor
     this.languageConf = new Compartment();
     this.themeConf = new Compartment();
-    this.editorView = this.createEditor();
+    this.tabStates = new Map();
+    this.editorView = new EditorView({
+      state: this.createEditorState("", null),
+      parent: document.getElementById("editor-container")!,
+    });
 
     // Initialize UI
     this.eventHandlers.initialize();
@@ -91,11 +97,7 @@ export class EditorManager {
         this.tabManager.loadTabs(savedTabs, activeIndex);
         const active = this.tabManager.getActiveTab();
         if (active) {
-          this.updateEditorContent(active.content);
-          this.updateLanguage(active.path);
-          this.renderTabs();
-          this.updateTitle(active.name);
-          this.restoreEditorState(active.id);
+          this.loadTabIntoView(active.id);
         }
       } else {
         this.createNewTab(
@@ -127,13 +129,13 @@ export class EditorManager {
   // Editor Initialization
   // ========================================================================
 
-  private createEditor(): EditorView {
-    // Get the current theme from settings
+  private createEditorState(content: string, filePath: string | null): EditorState {
     const currentTheme = this.settingsManager.getTheme();
     const themeExtension = getThemeExtension(currentTheme);
+    const langExtension = getLanguageExtension(filePath);
 
-    const startState = EditorState.create({
-      doc: "",
+    return EditorState.create({
+      doc: content,
       extensions: [
         lineNumbers(),
         foldGutter(),
@@ -148,7 +150,7 @@ export class EditorManager {
         ]),
         bracketMatching(),
         indentationMarkers(),
-        this.languageConf.of([]),
+        this.languageConf.of(langExtension),
         this.themeConf.of(themeExtension),
         EditorState.tabSize.of(EDITOR_CONFIG.tabSize),
         EditorView.updateListener.of((update) => {
@@ -157,11 +159,6 @@ export class EditorManager {
           }
         }),
       ],
-    });
-
-    return new EditorView({
-      state: startState,
-      parent: document.getElementById("editor-container")!,
     });
   }
 
@@ -191,6 +188,7 @@ export class EditorManager {
       cursorPosition,
       scrollTop,
     );
+    this.tabStates.set(activeTab.id, this.editorView.state);
   }
 
   private saveOpenTabs(): void {
@@ -312,13 +310,7 @@ export class EditorManager {
     this.saveEditorState();
 
     const tab = this.tabManager.createTab(name, path, content);
-    this.updateEditorContent(tab.content);
-    this.updateLanguage(tab.path);
-    this.renderTabs();
-    this.updateTitle(tab.name);
-
-    // New tabs start at position 0
-    this.restoreEditorState(tab.id);
+    this.loadTabIntoView(tab.id);
     this.saveOpenTabs();
   }
 
@@ -328,16 +320,7 @@ export class EditorManager {
 
     if (!this.tabManager.switchToTab(tabId)) return;
 
-    const tab = this.tabManager.getActiveTab();
-    if (!tab) return;
-
-    this.updateEditorContent(tab.content);
-    this.updateLanguage(tab.path);
-    this.renderTabs();
-    this.updateTitle(tab.name);
-
-    // Restore the saved state for this tab
-    this.restoreEditorState(tabId);
+    this.loadTabIntoView(tabId);
     this.saveOpenTabs();
   }
 
@@ -346,6 +329,8 @@ export class EditorManager {
     const closed = await this.tabManager.closeTab(tabId);
 
     if (!closed) return;
+    
+    this.tabStates.delete(tabId);
 
     if (wasActive) {
       if (this.tabManager.hasNoTabs()) {
@@ -353,10 +338,7 @@ export class EditorManager {
       } else {
         const newActiveTab = this.tabManager.getActiveTab();
         if (newActiveTab) {
-          this.updateEditorContent(newActiveTab.content);
-          this.updateLanguage(newActiveTab.path);
-          this.updateTitle(newActiveTab.name);
-          this.restoreEditorState(newActiveTab.id);
+          this.loadTabIntoView(newActiveTab.id);
         }
       }
     }
@@ -379,11 +361,7 @@ export class EditorManager {
     this.tabManager.switchToNextTab();
     const activeTab = this.tabManager.getActiveTab();
     if (activeTab) {
-      this.updateEditorContent(activeTab.content);
-      this.updateLanguage(activeTab.path);
-      this.renderTabs();
-      this.updateTitle(activeTab.name);
-      this.restoreEditorState(activeTab.id);
+      this.loadTabIntoView(activeTab.id);
       this.saveOpenTabs();
     }
   }
@@ -530,14 +508,20 @@ export class EditorManager {
     document.title = `Notepad# - ${tabName}`;
   }
 
-  private updateEditorContent(content: string): void {
-    this.editorView.dispatch({
-      changes: {
-        from: 0,
-        to: this.editorView.state.doc.length,
-        insert: content,
-      },
-    });
+  private loadTabIntoView(tabId: number): void {
+    const tab = this.tabManager.findTabById(tabId);
+    if (!tab) return;
+    
+    let state = this.tabStates.get(tabId);
+    if (!state) {
+      state = this.createEditorState(tab.content, tab.path);
+      this.tabStates.set(tabId, state);
+    }
+    
+    this.editorView.setState(state);
+    this.renderTabs();
+    this.updateTitle(tab.name);
+    this.restoreEditorState(tabId);
   }
 
   private updateLanguage(filePath: string | null): void {
@@ -545,9 +529,12 @@ export class EditorManager {
     this.editorView.dispatch({
       effects: this.languageConf.reconfigure(langExtension),
     });
+    const activeTab = this.tabManager.getActiveTab();
+    if (activeTab) {
+      this.tabStates.set(activeTab.id, this.editorView.state);
+    }
   }
 
-  // Theme toggle handling
   private toggleTheme(): void {
     const current = this.settingsManager.getTheme();
     const newTheme = current === "dracula" ? "githubLight" : "dracula";
@@ -557,6 +544,18 @@ export class EditorManager {
     this.editorView.dispatch({
       effects: this.themeConf.reconfigure(themeExtension),
     });
+    
+    const activeTabId = this.tabManager.getActiveTabId();
+    for (const [id, state] of this.tabStates.entries()) {
+      if (id === activeTabId) {
+        this.tabStates.set(id, this.editorView.state);
+      } else {
+        const tr = state.update({
+          effects: this.themeConf.reconfigure(themeExtension)
+        });
+        this.tabStates.set(id, tr.state);
+      }
+    }
 
     this.updateThemeToggleButton(newTheme);
     this.applyThemeClass(newTheme);
@@ -580,8 +579,11 @@ export class EditorManager {
   private updateThemeToggleButton(themeId: string): void {
     const btn = document.getElementById("btn-theme-toggle");
     if (!btn) return;
-    // use moon for dark theme, sun for light theme
-    btn.textContent = themeId === "dracula" ? "☾" : "☀";
+    
+    const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
+    const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
+    
+    btn.innerHTML = themeId === "dracula" ? moonIcon : sunIcon;
   }
 
   // Insert a C# template at the current cursor position (or replace selection).

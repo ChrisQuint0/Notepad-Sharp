@@ -23,6 +23,7 @@
     "@codemirror/view": "^6.39.8",
     "@replit/codemirror-indentation-markers": "^6.5.3",
     "@replit/codemirror-lang-csharp": "^6.2.0",
+    "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-dialog": "^2.4.2",
     "@tauri-apps/plugin-fs": "^2.4.4",
     "@tauri-apps/plugin-http": "^2.5.4",

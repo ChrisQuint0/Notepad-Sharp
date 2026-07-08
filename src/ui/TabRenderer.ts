@@ -9,6 +9,7 @@ export class TabRenderer {
   private onTabReorder:
     | ((sourceId: number, targetIndex: number) => void)
     | null = null;
+  private onNewTab?: () => void;
   private editingTabId: number | null = null;
   private draggedTabId: number | null = null;
   private draggedEl: HTMLElement | null = null;
@@ -18,11 +19,13 @@ export class TabRenderer {
     onTabClose: (tabId: number) => Promise<void>,
     onTabRename: (tabId: number, newName: string) => Promise<void>,
     onTabReorder?: (sourceId: number, targetIndex: number) => void,
+    onNewTab?: () => void,
   ) {
     this.onTabClick = onTabClick;
     this.onTabClose = onTabClose;
     this.onTabRename = onTabRename;
     this.onTabReorder = onTabReorder ?? null;
+    this.onNewTab = onNewTab;
   }
 
   render(tabs: Tab[], activeTabId: number | null): void {
@@ -35,6 +38,17 @@ export class TabRenderer {
       const tabEl = this.createTabElement(tab, activeTabId);
       tabBar.appendChild(tabEl);
     });
+
+    if (this.onNewTab) {
+      const newTabBtn = document.createElement("button");
+      newTabBtn.className = "new-tab-btn";
+      newTabBtn.textContent = "+";
+      newTabBtn.title = "New Tab (Ctrl+N)";
+      newTabBtn.onclick = () => {
+        if (this.onNewTab) this.onNewTab();
+      };
+      tabBar.appendChild(newTabBtn);
+    }
 
     // Allow dropping on empty space (append to end)
     tabBar.ondragover = (e) => {

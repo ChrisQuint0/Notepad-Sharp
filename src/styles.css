@@ -29,6 +29,78 @@ body {
   background: #282c34;
 }
 
+/* Custom Titlebar */
+.titlebar {
+  height: 30px;
+  background: #1e2127;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.titlebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #abb2bf;
+}
+
+.titlebar-logo img {
+  width: 16px;
+  height: 16px;
+}
+
+.titlebar-controls {
+  display: flex;
+  height: 100%;
+}
+
+.titlebar-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 46px;
+  height: 100%;
+  color: #abb2bf;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.titlebar-button:hover {
+  background: #3e4451;
+}
+
+.titlebar-button.close:hover {
+  background: #e81123;
+  color: #ffffff;
+}
+
+body.light-theme .titlebar {
+  background: #e1e4e8;
+}
+
+body.light-theme .titlebar-logo {
+  color: #24292e;
+}
+
+body.light-theme .titlebar-button {
+  color: #24292e;
+}
+
+body.light-theme .titlebar-button:hover {
+  background: #d0d7de;
+}
+
+body.light-theme .titlebar-button.close:hover {
+  background: #e81123;
+  color: #ffffff;
+}
+
 #toolbar {
   background: #21252b;
   padding: 5px 12px;
@@ -118,15 +190,17 @@ body {
   background: #21252b;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #181a1f;
   overflow-x: auto;
   overflow-y: hidden;
   flex-shrink: 0;
-  min-height: 35px;
+  min-height: 38px;
+  padding: 4px 8px 0;
+  gap: 2px;
+  border-bottom: 1px solid #181a1f;
 }
 
 #tab-bar::-webkit-scrollbar {
-  height: 4px;
+  height: 3px;
 }
 
 #tab-bar::-webkit-scrollbar-thumb {
@@ -138,23 +212,43 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 6px 14px;
   background: transparent;
-  color: #969696;
+  color: #7a808a;
   border: none;
-  border-right: 1px solid #181a1f;
+  border-radius: 6px 6px 0 0;
   cursor: default;
   font-size: 13px;
   white-space: nowrap;
-  transition: background-color 0.1s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
   min-width: 120px;
-  max-width: 200px;
+  max-width: 220px;
   -webkit-user-select: none;
   user-select: none;
+  position: relative;
 }
 
 .tab:hover {
   cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  color: #abb2bf;
+}
+
+.tab.active {
+  background: #282c34;
+  color: #e8ecf2;
+}
+
+/* Accent underline on active tab */
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: #e8ecf2;
 }
 
 .tab.dragging {
@@ -342,28 +436,109 @@ body.light-theme .theme-toggle {
 }
 
 body.light-theme #tab-bar {
-  background: #ffffff;
+  background: #f6f8fa;
   border-bottom: 1px solid #e1e4e8;
 }
 
 body.light-theme .tab {
-  color: #24292e;
+  color: #656d76;
   background: transparent;
-  border-right: 1px solid #eaecef;
 }
 
 body.light-theme .tab:hover {
-  background: #f6f8fa;
+  background: rgba(0, 0, 0, 0.04);
+  color: #24292e;
 }
 
 body.light-theme .tab.active {
   background: #ffffff;
-  font-weight: 600;
-  color: #24292e;
+  color: #1a1a1a;
+}
+
+body.light-theme .tab.active::after {
+  background: #1a1a1a;
 }
 
 body.light-theme .tab-close {
   color: #57606a;
+}
+
+body.light-theme .tab-close:hover {
+  background: #e0e0e0;
+}
+
+body.light-theme .tab-name-input {
+  background: #ffffff;
+  color: #24292e;
+  border-color: #d0d7de;
+}
+
+/* Light Theme Scrollbars */
+body.light-theme {
+  scrollbar-color: #c1c1c1 #f6f8fa;
+}
+
+body.light-theme .cm-scroller {
+  scrollbar-color: #c1c1c1 #f6f8fa;
+}
+
+body.light-theme .cm-scroller::-webkit-scrollbar-track,
+body.light-theme .modal-body::-webkit-scrollbar-track,
+body.light-theme .output-display::-webkit-scrollbar-track,
+body.light-theme #tab-bar::-webkit-scrollbar-track {
+  background: #f6f8fa;
+}
+
+body.light-theme .cm-scroller::-webkit-scrollbar-thumb,
+body.light-theme .modal-body::-webkit-scrollbar-thumb,
+body.light-theme .output-display::-webkit-scrollbar-thumb,
+body.light-theme #tab-bar::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border: 2px solid #f6f8fa;
+  border-radius: 6px;
+}
+
+body.light-theme .cm-scroller::-webkit-scrollbar-thumb:hover,
+body.light-theme .modal-body::-webkit-scrollbar-thumb:hover,
+body.light-theme .output-display::-webkit-scrollbar-thumb:hover,
+body.light-theme #tab-bar::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+body.light-theme .cm-scroller::-webkit-scrollbar-corner {
+  background: #f6f8fa;
+}
+
+/* New Tab Button */
+.new-tab-btn {
+  background: transparent;
+  color: #7a808a;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  margin-left: 2px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  min-width: 32px;
+}
+
+.new-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #abb2bf;
+}
+
+body.light-theme .new-tab-btn {
+  color: #656d76;
+}
+
+body.light-theme .new-tab-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #24292e;
 }
 
 body.light-theme .dropdown-content {
@@ -383,25 +558,7 @@ body.light-theme .cm-scroller {
   color: #24292e;
 }
 
-/* Dark theme tweaks: make tab borders lighter so tabs pop against Dracula */
-body.dark-theme #tab-bar {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-body.dark-theme .tab {
-  border-right: 1px solid rgba(255, 255, 255, 0.03);
-  color: #dfe6ee;
-}
-
-body.dark-theme .tab:hover {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-body.dark-theme .tab.active {
-  background: rgba(255, 255, 255, 0.02);
-  color: #ffffff;
-  font-weight: 600;
-}
+/* Dark theme tweaks: rely on base styles for pill tabs */
 
 /* ============================================================================ */
 /* Modal Styles */
